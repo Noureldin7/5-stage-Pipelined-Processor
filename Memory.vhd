@@ -26,5 +26,5 @@ ARCHITECTURE MemoryArch OF Memory IS
 					END IF;
 				END IF;
 		END PROCESS;
-		dataout <= Memory(to_integer(unsigned(address))) when MEMR='1';
+		dataout <= Memory(to_integer(unsigned(address)));
 END MemoryArch;
