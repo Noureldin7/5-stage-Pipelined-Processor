@@ -24,8 +24,8 @@ ENTITY CU IS
 END ENTITY CU;
 
 ARCHITECTURE CUArch OF CU IS
-	Signal jmp:std_logic;
-	Signal PortEn:std_logic;
+	Signal jmp:std_logic := '0';
+	Signal PortEn:std_logic := '0';
 	BEGIN
 		RegWrite<=OpCode(3);
 		Immediate<=OpCode(6);

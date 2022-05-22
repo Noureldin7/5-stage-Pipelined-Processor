@@ -15,7 +15,7 @@ END ENTITY Memory;
 ARCHITECTURE MemoryArch OF Memory IS
 
 	TYPE memory_type IS ARRAY(0 TO 1048575) OF std_logic_vector(31 DOWNTO 0);
-	SIGNAL Memory : memory_type ;
+	SIGNAL Memory : memory_type := (others=>(others=>'0')) ;
 	
 	BEGIN
 		PROCESS(clk) IS

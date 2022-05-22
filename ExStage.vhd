@@ -5,6 +5,8 @@ USE IEEE.numeric_std.all;
 ENTITY Execute IS
 	PORT(
 		clk : IN std_logic;
+		RD : IN std_logic_vector(2 downto 0);
+		RS : IN std_logic_vector(31 downto 0);
 		Op1 : IN  std_logic_vector(31 DOWNTO 0);
 		Op2  : IN  std_logic_vector(31 DOWNTO 0);
 		RegWrite : IN  std_logic;
@@ -23,6 +25,8 @@ ENTITY Execute IS
 		CheckN : IN std_logic;
 		CheckZ : IN std_logic;
 		NoCheck : IN std_logic;
+		RDbuf : OUT std_logic_vector(2 downto 0);
+		RSbuf : OUT std_logic_vector(31 downto 0);
 		RegWritebuf : OUT  std_logic;
 		Immediatebuf : OUT std_logic;
 		Jumpbuf : OUT std_logic;
@@ -43,8 +47,8 @@ ENTITY Execute IS
 END ENTITY Execute;
 
 ARCHITECTURE ExArch OF Execute IS
-	Signal Carrysig,Zerosig,Negativesig:std_logic;
-	Signal Resultsig:std_logic_vector(31 downto 0);
+	Signal Carrysig,Zerosig,Negativesig:std_logic := '0';
+	Signal Resultsig:std_logic_vector(31 downto 0) := (others=>'0');
 	Component ALU IS
 	PORT(
 		OpA : IN  std_logic_vector(31 DOWNTO 0);
@@ -62,6 +66,8 @@ ARCHITECTURE ExArch OF Execute IS
 	Process(clk)
 		Begin
 			IF rising_edge(clk) then
+				RDbuf<=RD;
+				RSbuf<=RS;
 				RegWritebuf<=RegWrite;
 				Immediatebuf<=Immediate;
 				Jumpbuf<=Jump;

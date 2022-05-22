@@ -20,14 +20,14 @@ ENTITY Fetch IS
 END ENTITY Fetch;
 
 ARCHITECTURE FetchArch OF Fetch IS
-	signal opsig : std_logic_vector(7 downto 0);
-	signal rdsig : std_logic_vector(2 downto 0);
-	signal rtsig : std_logic_vector(2 downto 0);
-	signal rssig : std_logic_vector(2 downto 0);
-	signal immsig : std_logic_vector(15 downto 0);
-	signal pcsigout : std_logic_vector(19 downto 0);
-	signal pcsigin : std_logic_vector(19 downto 0);
-	signal add4sig : std_logic_vector(19 downto 0);
+	signal opsig : std_logic_vector(7 downto 0) := (others=>'0');
+	signal rdsig : std_logic_vector(2 downto 0) := (others=>'0');
+	signal rtsig : std_logic_vector(2 downto 0) := (others=>'0');
+	signal rssig : std_logic_vector(2 downto 0) := (others=>'0');
+	signal immsig : std_logic_vector(15 downto 0) := (others=>'0');
+	signal pcsigout : std_logic_vector(19 downto 0) := (others=>'0');
+	signal pcsigin : std_logic_vector(19 downto 0) := (others=>'0');
+	signal add4sig : std_logic_vector(19 downto 0) := (others=>'0');
 	BEGIN
 	opsig<=Ins(31 downto 24);
 	rdsig<=Ins(23 downto 21);

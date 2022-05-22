@@ -16,8 +16,8 @@ ENTITY ALU IS
 END ENTITY ALU;
 
 ARCHITECTURE ALUArch OF ALU IS
-	Signal C,Z,N:std_logic;
-	Signal Temp:unsigned(31 downto 0);
+	Signal C,Z,N:std_logic := '0';
+	Signal Temp:unsigned(31 downto 0) := (others=>'0');
 	BEGIN
 		Temp<=unsigned(OpA) when Enable='0'
 		else unsigned(OpA)+unsigned(OpB) when Mode=("00")

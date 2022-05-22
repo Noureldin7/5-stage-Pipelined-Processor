@@ -16,8 +16,8 @@ END ENTITY RegFile;
 
 ARCHITECTURE RegFileArch OF RegFile IS
 	Type OutBus is array(0 to 7) of std_logic_vector(31 downto 0);
-	Signal Enable:std_logic_vector(7 downto 0);	
-	Signal DataOut:OutBus;
+	Signal Enable:std_logic_vector(7 downto 0) := (others=>'0');	
+	Signal DataOut:OutBus := (others=>(others=>'0'));
 	Component Reg is
 	Port(
 		D: IN std_logic_vector(31 downto 0);
