@@ -20,7 +20,7 @@ ARCHITECTURE MemoryArch OF Memory IS
 	BEGIN
 		PROCESS(clk) IS
 			BEGIN
-				IF rising_edge(clk) THEN  
+				IF falling_edge(clk) THEN  
 					IF MEMW = '1' THEN
 						Memory(to_integer(unsigned(address))) <= datain;
 					END IF;

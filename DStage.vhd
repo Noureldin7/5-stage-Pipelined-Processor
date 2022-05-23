@@ -6,7 +6,7 @@ USE IEEE.numeric_std.all;
 ENTITY Decode IS
 	PORT(
 		clk : IN std_logic;
-		OpCode  : IN std_logic_vector(7 downto 0);
+		OpCode  : IN std_logic_vector(6 downto 0);
 		RD : IN std_logic_vector(2 downto 0);
 		RT  : IN std_logic_vector(31 downto 0);
 		RS  : IN std_logic_vector(31 downto 0);
@@ -37,7 +37,7 @@ END ENTITY Decode;
 ARCHITECTURE DecodeArch OF Decode IS
 Component CU IS
 	PORT(
-		OpCode : IN  std_logic_vector(7 DOWNTO 0);
+		OpCode : IN  std_logic_vector(6 DOWNTO 0);
 		RegWrite : OUT  std_logic;
 		Mode : OUT std_logic_vector(1 downto 0);
 		ALUEnable : OUT  std_logic;

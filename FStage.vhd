@@ -12,7 +12,7 @@ ENTITY Fetch IS
 		sel  : IN  std_logic;
 		Add : OUT std_logic_vector(19 downto 0);
 		Enable  : IN  std_logic;
-		OpCode  : OUT std_logic_vector(7 downto 0);
+		OpCode  : OUT std_logic_vector(6 downto 0);
 		RD  : OUT std_logic_vector(2 downto 0);
 		RT  : OUT std_logic_vector(2 downto 0);
 		RS  : OUT std_logic_vector(2 downto 0);
@@ -20,7 +20,7 @@ ENTITY Fetch IS
 END ENTITY Fetch;
 
 ARCHITECTURE FetchArch OF Fetch IS
-	signal opsig : std_logic_vector(7 downto 0) := (others=>'0');
+	signal opsig : std_logic_vector(6 downto 0) := (others=>'0');
 	signal rdsig : std_logic_vector(2 downto 0) := (others=>'0');
 	signal rtsig : std_logic_vector(2 downto 0) := (others=>'0');
 	signal rssig : std_logic_vector(2 downto 0) := (others=>'0');
@@ -29,10 +29,10 @@ ARCHITECTURE FetchArch OF Fetch IS
 	signal pcsigin : std_logic_vector(19 downto 0) := (others=>'0');
 	signal add4sig : std_logic_vector(19 downto 0) := (others=>'0');
 	BEGIN
-	opsig<=Ins(31 downto 24);
-	rdsig<=Ins(23 downto 21);
-	rtsig<=Ins(20 downto 18);
-	rssig<=Ins(17 downto 15);
+	opsig<=Ins(31 downto 25);
+	rdsig<=Ins(24 downto 22);
+	rtsig<=Ins(21 downto 19);
+	rssig<=Ins(18 downto 16);
 	immsig<=Ins(15 downto 0);
 	add4sig<=std_logic_vector(unsigned(pcsigout)+1);
 	Add<=pcsigout;
@@ -60,7 +60,7 @@ ARCHITECTURE FetchArch OF Fetch IS
 		Begin
 			IF rst='1' then
 				pcsigout<=(others=>'0');
-			ELSIF rising_edge(clk) and MemRead='0' and Enable='1' then
+			ELSIF falling_edge(clk) and MemRead='0' and Enable='1' then
 				pcsigout<=pcsigin;
 			END IF;
 		END Process;

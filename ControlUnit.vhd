@@ -4,7 +4,7 @@ USE IEEE.numeric_std.all;
 
 ENTITY CU IS
 	PORT(
-		OpCode : IN  std_logic_vector(7 DOWNTO 0);
+		OpCode : IN  std_logic_vector(6 DOWNTO 0);
 		RegWrite : OUT  std_logic;
 		Mode : OUT std_logic_vector(1 downto 0);
 		ALUEnable : OUT  std_logic;
@@ -29,7 +29,6 @@ ARCHITECTURE CUArch OF CU IS
 	BEGIN
 		RegWrite<=OpCode(3);
 		Immediate<=OpCode(6);
-		ALUEnable<=OpCode(7);
 		Mode(1)<=OpCode(3) AND OpCode(1);
 		Mode(0)<=OpCode(2) XOR OpCode(1);
 		SETC<=OpCode(2) AND OpCode(1) AND (NOT OpCode(0));
@@ -56,5 +55,9 @@ ARCHITECTURE CUArch OF CU IS
 		MEMW<=OpCode(1) when OpCode(5)='1'
 		else '0';
 		MEMR<= NOT OpCode(1) when OpCode(5)='1'
+		else '0';
+		ALUEnable<='1' when OpCode=("0001001") or OpCode=("0001101") or OpCode=("0001011") or OpCode=("1001001")
+		else '1' when OpCode=("0001111") or OpCode=("0001000")
+		else '1' when OpCode=("1101001") or OpCode=("1100111")
 		else '0';
 END CUArch;

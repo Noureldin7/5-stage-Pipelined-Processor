@@ -44,7 +44,7 @@ ARCHITECTURE CPUArch OF CPU IS
 	Signal Modesig : std_logic_vector(1 downto 0) := (others=>'0');
 	Signal NoChecksig : std_logic := '0';
 	Signal NoChecksigEx : std_logic := '0';
-	signal OpCodesig  : std_logic_vector(7 downto 0) := (others=>'0');
+	signal OpCodesig  : std_logic_vector(6 downto 0) := (others=>'0');
 	Signal Op1sig : std_logic_vector(31 downto 0) := (others=>'0');
 	Signal Op2sig : std_logic_vector(31 downto 0) := (others=>'0');
 	Signal PortReadsig : std_logic := '0';
@@ -76,7 +76,7 @@ ARCHITECTURE CPUArch OF CPU IS
 		sel  : IN  std_logic;
 		Add : OUT std_logic_vector(19 downto 0);
 		Enable  : IN  std_logic;
-		OpCode  : OUT std_logic_vector(7 downto 0);
+		OpCode  : OUT std_logic_vector(6 downto 0);
 		RD  : OUT std_logic_vector(2 downto 0);
 		RT  : OUT std_logic_vector(2 downto 0);
 		RS  : OUT std_logic_vector(2 downto 0);
@@ -94,7 +94,7 @@ ARCHITECTURE CPUArch OF CPU IS
 	Component Decode IS
 	PORT(
 		clk : IN std_logic;
-		OpCode  : IN std_logic_vector(7 downto 0);
+		OpCode  : IN std_logic_vector(6 downto 0);
 		RD : IN std_logic_vector(2 downto 0);
 		RT  : IN std_logic_vector(31 downto 0);
 		RS  : IN std_logic_vector(31 downto 0);

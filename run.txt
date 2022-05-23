@@ -1,9 +1,9 @@
 mem load -filltype rand -filldata 0 -fillradix hexadecimal -skip 0 /cpu/reg/DataOut
 mem load -filltype rand -filldata 0 -fillradix hexadecimal -skip 0 /cpu/mem/Memory
 mem load -filltype value -filldata 0 -fillradix hexadecimal /cpu/mem/Memory(0)
-mem load -filltype value -filldata 894e0000 -fillradix hexadecimal /cpu/mem/Memory(1)
+mem load -filltype value -filldata 129c0000 -fillradix hexadecimal /cpu/mem/Memory(1)
 mem load -filltype value -filldata 0 -fillradix hexadecimal /cpu/mem/Memory(2)
-mem load -filltype value -filldata 8f000000 -fillradix hexadecimal /cpu/mem/Memory(3)
+mem load -filltype value -filldata 1e080000 -fillradix hexadecimal /cpu/mem/Memory(3)
 add wave -position insertpoint sim:/cpu/*
 force -freeze sim:/cpu/clk 0 0, 1 {50 ps} -r 100
 force -freeze sim:/cpu/sel 0 0

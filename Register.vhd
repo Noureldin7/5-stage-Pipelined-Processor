@@ -12,7 +12,7 @@ Architecture archReg OF Reg IS
 	Begin
 		IF rst='1'then
 			q<=(others=>'0');
-		ELSIF rising_edge(clk) and enable='1' then
+		ELSIF falling_edge(clk) and enable='1' then
 			q<=d;
 		END IF;
 	END Process;
