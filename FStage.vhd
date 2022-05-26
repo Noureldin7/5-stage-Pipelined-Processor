@@ -5,11 +5,11 @@ USE IEEE.numeric_std.all;
 ENTITY Fetch IS
 	PORT(
 		Ins : IN  std_logic_vector(31 DOWNTO 0);
-		Oride : IN  std_logic_vector(19 DOWNTO 0);
+		JumpAddress : IN  std_logic_vector(31 DOWNTO 0);
 		clk  : IN  std_logic;
 		rst  : IN  std_logic;
 		MemRead  : IN  std_logic;
-		sel  : IN  std_logic;
+		CheckedJump  : IN  std_logic;
 		Add : OUT std_logic_vector(19 downto 0);
 		Enable  : IN  std_logic;
 		OpCode  : OUT std_logic_vector(6 downto 0);
@@ -25,9 +25,9 @@ ARCHITECTURE FetchArch OF Fetch IS
 	signal rtsig : std_logic_vector(2 downto 0) := (others=>'0');
 	signal rssig : std_logic_vector(2 downto 0) := (others=>'0');
 	signal immsig : std_logic_vector(15 downto 0) := (others=>'0');
-	signal pcsigout : std_logic_vector(19 downto 0) := (others=>'0');
-	signal pcsigin : std_logic_vector(19 downto 0) := (others=>'0');
-	signal add4sig : std_logic_vector(19 downto 0) := (others=>'0');
+	signal pcsigout : std_logic_vector(31 downto 0) := (others=>'0');
+	signal pcsigin : std_logic_vector(31 downto 0) := (others=>'0');
+	signal add4sig : std_logic_vector(31 downto 0) := (others=>'0');
 	BEGIN
 	opsig<=Ins(31 downto 25);
 	rdsig<=Ins(24 downto 22);
@@ -35,8 +35,8 @@ ARCHITECTURE FetchArch OF Fetch IS
 	rssig<=Ins(18 downto 16);
 	immsig<=Ins(15 downto 0);
 	add4sig<=std_logic_vector(unsigned(pcsigout)+1);
-	Add<=pcsigout;
-	pcsigin<=Oride when sel='1'
+	Add<=pcsigout(19 downto 0);
+	pcsigin<=JumpAddress when CheckedJump='1'
 	else add4sig;
 		Process(clk)
 		Begin

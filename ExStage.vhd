@@ -21,10 +21,7 @@ ENTITY Execute IS
 		MemWrite : IN std_logic;
 		MemRead : IN std_logic;
 		SETC : IN std_logic;
-		CheckC : IN std_logic;
-		CheckN : IN std_logic;
-		CheckZ : IN std_logic;
-		NoCheck : IN std_logic;
+		Checks : IN std_logic_vector(1 downto 0);
 		RDbuf : OUT std_logic_vector(2 downto 0);
 		RSbuf : OUT std_logic_vector(31 downto 0);
 		RegWritebuf : OUT  std_logic;
@@ -36,10 +33,7 @@ ENTITY Execute IS
 		PortReadbuf : OUT std_logic;
 		MEMWbuf : OUT std_logic;
 		MEMRbuf : OUT std_logic;
-		CheckCbuf : OUT std_logic;
-		CheckNbuf : OUT std_logic;
-		CheckZbuf : OUT std_logic;
-		NoCheckbuf : OUT std_logic;
+		Checksbuf : OUT std_logic_vector(1 downto 0);
 		Result : OUT std_logic_vector(31 DOWNTO 0);
 		Carry : OUT std_logic;
 		Zero : OUT std_logic;
@@ -70,17 +64,22 @@ ARCHITECTURE ExArch OF Execute IS
 				RSbuf<=RS;
 				RegWritebuf<=RegWrite;
 				Immediatebuf<=Immediate;
-				Jumpbuf<=Jump;
+				IF Checks=("00") then
+					Jumpbuf<=Jump and Zerosig;
+				ELSIF Checks=("01") then
+					Jumpbuf<=Jump and Negativesig;
+				ELSIF Checks=("10") then
+					Jumpbuf<=Jump and Carrysig;
+				ELSE
+					Jumpbuf<=Jump;
+				END IF;
 				IncSPbuf<=IncSP;
 				DecSPbuf<=DecSP;
 				PortWritebuf<=PortWrite;
 				PortReadbuf<=PortRead;
 				MEMWbuf<=MemWrite;
 				MEMRbuf<=MemRead;
-				CheckCbuf<=CheckC;
-				CheckNbuf<=CheckN ;
-				CheckZbuf<=CheckZ ;
-				NoCheckbuf<=NoCheck;
+				Checksbuf<=Checks;
 				Result<=Resultsig;
 				Carry<=Carrysig;
 				Zero<=Zerosig;

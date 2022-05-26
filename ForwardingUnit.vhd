@@ -25,7 +25,7 @@ ARCHITECTURE FWDUArch OF FWDU IS
 		Op1<=ALUBuff when RegWALU='1'AND DstALU=SrcAdd1
 		else MemBuff when RegWMEM='1'AND DstMEM=SrcAdd1
 		else SrcVal1;
-		Op2<=SXT(ImmVal,32) when Imm='1'
+		Op2<=EXT(ImmVal,32) when Imm='1'
 		else ALUBuff when RegWALU='1'AND DstALU=SrcAdd2
 		else MemBuff when RegWMEM='1'AND DstMEM=SrcAdd2
 		else SrcVal2;

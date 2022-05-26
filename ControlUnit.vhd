@@ -17,10 +17,7 @@ ENTITY CU IS
 		MEMW : OUT std_logic;
 		MEMR : OUT std_logic;
 		SETC : OUT std_logic;
-		CheckC : OUT std_logic;
-		CheckN : OUT std_logic;
-		CheckZ : OUT std_logic;
-		NoCheck : OUT std_logic);
+		Checks : OUT std_logic_vector(1 downto 0));
 END ENTITY CU;
 
 ARCHITECTURE CUArch OF CU IS
@@ -38,14 +35,8 @@ ARCHITECTURE CUArch OF CU IS
 		else '0';
 		DecSP<= Not OpCode(0) when OpCode(6 downto 5)=("01")
 		else '0';
-		CheckC<='1' when (jmp AND (OpCode(5) XNOR OpCode(2)))='1' AND OpCode(1 downto 0)=("10")
-		else '0';
-		CheckZ<='1' when (jmp AND (OpCode(5) XNOR OpCode(2)))='1' AND OpCode(1 downto 0)=("00")
-		else '0';
-		CheckN<='1' when (jmp AND (OpCode(5) XNOR OpCode(2)))='1' AND OpCode(1 downto 0)=("01")
-		else '0';
-		NoCheck<='1' when (jmp AND (OpCode(5) XNOR OpCode(2)))='1' AND OpCode(1 downto 0)=("11")
-		else '0';
+		Checks<=OpCode(1 downto 0) when (jmp AND (OpCode(5) XNOR OpCode(2)))='1'
+		else (others=>'1');
 		PortEn<='1' when OpCode(6 downto 4)=("001")
 		else '0';
 		PortWrite<=OpCode(0) when PortEn='1'

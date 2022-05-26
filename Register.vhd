@@ -7,13 +7,15 @@ entity Reg IS
 		q:OUT std_logic_vector(31 downto 0));
 END entity Reg;
 Architecture archReg OF Reg IS
+	signal wire: std_logic_vector(31 downto 0) := (others=>'0');
 	BEGIN
+	wire<=d;
 	Process(clk,rst)
 	Begin
 		IF rst='1'then
 			q<=(others=>'0');
 		ELSIF falling_edge(clk) and enable='1' then
-			q<=d;
+			q<=wire;
 		END IF;
 	END Process;
 END archReg;

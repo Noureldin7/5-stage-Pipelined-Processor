@@ -5,9 +5,7 @@ USE IEEE.numeric_std.all;
 ENTITY CPU IS
 	PORT(
 		clk : IN std_logic;
-		sel : IN std_logic;
 		Enable : IN std_logic;
-		Oride : IN  std_logic_vector(19 DOWNTO 0);
 		rst : IN  std_logic;
 		Result  : OUT std_logic_vector(31 downto 0);
 		Carry  : OUT std_logic;
@@ -19,12 +17,8 @@ ARCHITECTURE CPUArch OF CPU IS
 	signal Addressbufmem : std_logic_vector(19 downto 0) := (others=>'0');
 	signal Addresssig : std_logic_vector(19 downto 0) := (others=>'0');
 	Signal ALUEnablesig :  std_logic := '0';
-	Signal CheckCsig : std_logic := '0';
-	Signal CheckNsig : std_logic := '0';
-	Signal CheckZsig : std_logic := '0';
-	Signal CheckCsigEx : std_logic := '0';
-	Signal CheckNsigEx : std_logic := '0';
-	Signal CheckZsigEx : std_logic := '0';
+	Signal Checksig : std_logic_vector(1 downto 0) := (others=>'0');
+	Signal ChecksigEx : std_logic_vector(1 downto 0) := (others=>'0');
 	Signal DataINbuf : std_logic_vector(31 downto 0) := (others=>'0');
 	Signal DecSPsig : std_logic := '0';
 	Signal DecSPsigEx : std_logic := '0';
@@ -42,8 +36,6 @@ ARCHITECTURE CPUArch OF CPU IS
 	Signal MEMWsig : std_logic := '0';
 	Signal MEMWsigEx : std_logic := '0';
 	Signal Modesig : std_logic_vector(1 downto 0) := (others=>'0');
-	Signal NoChecksig : std_logic := '0';
-	Signal NoChecksigEx : std_logic := '0';
 	signal OpCodesig  : std_logic_vector(6 downto 0) := (others=>'0');
 	Signal Op1sig : std_logic_vector(31 downto 0) := (others=>'0');
 	Signal Op2sig : std_logic_vector(31 downto 0) := (others=>'0');
@@ -69,11 +61,11 @@ ARCHITECTURE CPUArch OF CPU IS
 	Component Fetch IS
 	PORT(
 		Ins : IN  std_logic_vector(31 DOWNTO 0);
-		Oride : IN  std_logic_vector(19 DOWNTO 0);
+		JumpAddress : IN  std_logic_vector(31 DOWNTO 0);
 		clk  : IN  std_logic;
 		rst  : IN  std_logic;
 		MemRead  : IN  std_logic;
-		sel  : IN  std_logic;
+		CheckedJump  : IN  std_logic;
 		Add : OUT std_logic_vector(19 downto 0);
 		Enable  : IN  std_logic;
 		OpCode  : OUT std_logic_vector(6 downto 0);
@@ -115,10 +107,7 @@ ARCHITECTURE CPUArch OF CPU IS
 		MEMW : OUT std_logic;
 		MEMR : OUT std_logic;
 		SETC : OUT std_logic;
-		CheckC : OUT std_logic;
-		CheckN : OUT std_logic;
-		CheckZ : OUT std_logic;
-		NoCheck : OUT std_logic);	
+		Checks : OUT std_logic_vector(1 downto 0));	
 	END Component;
 	Component RegFile IS
 	PORT(
@@ -150,10 +139,7 @@ ARCHITECTURE CPUArch OF CPU IS
 		MemWrite : IN std_logic;
 		MemRead : IN std_logic;
 		SETC : IN std_logic;
-		CheckC : IN std_logic;
-		CheckN : IN std_logic;
-		CheckZ : IN std_logic;
-		NoCheck : IN std_logic;
+		Checks : IN std_logic_vector(1 downto 0);
 		RDbuf : OUT std_logic_vector(2 downto 0);
 		RSbuf : OUT std_logic_vector(31 downto 0);
 		RegWritebuf : OUT  std_logic;
@@ -165,10 +151,7 @@ ARCHITECTURE CPUArch OF CPU IS
 		PortReadbuf : OUT std_logic;
 		MEMWbuf : OUT std_logic;
 		MEMRbuf : OUT std_logic;
-		CheckCbuf : OUT std_logic;
-		CheckNbuf : OUT std_logic;
-		CheckZbuf : OUT std_logic;
-		NoCheckbuf : OUT std_logic;
+		Checksbuf : OUT std_logic_vector(1 downto 0);
 		Result : OUT std_logic_vector(31 DOWNTO 0);
 		Carry : OUT std_logic;
 		Zero : OUT std_logic;
@@ -195,9 +178,9 @@ ARCHITECTURE CPUArch OF CPU IS
 	Addresssig<=Addressbufmem when (MEMWsigEx or MEMRsigEx)='1'
 	else Addressbuffet;
 	mem: Memory port map(clk,MEMWsigEx,MEMRsigEx,Addresssig,RSvalbuf2, MemDataOut);
-	fet: Fetch port map( MemDataOut,Oride,clk,rst,MEMRsigEx,sel,Addressbuffet,Enable,OpCodesig,RDsig,RTsig,RSsig,Immsig);
+	fet: Fetch port map( MemDataOut,Resultsig,clk,rst,MEMRsigEx,JumpsigEx,Addressbuffet,Enable,OpCodesig,RDsig,RTsig,RSsig,Immsig);
 	reg: RegFile port map(RTsig,RSsig,RDsigbufend,DataINbuf,RegWritesigend,clk,RTval,RSval);
-	dec: Decode port map(clk,OpCodesig,RDsig,RTval,RSval,Immsig,RDsigbuf,RSvalbuf,Op1sig,Op2sig,RegWritesig,Modesig,ALUEnablesig,Immediatesig,Jumpsig,IncSPsig,DecSPsig,PortWritesig,PortReadsig,MEMWsig,MEMRsig,SETCsig,CheckCsig,CheckNsig,CheckZsig,NoChecksig);
-	ex: Execute port map(clk,RDsigbuf,RSvalbuf,Op1sig,Op2sig,RegWritesig,Modesig,ALUEnablesig,Immediatesig,Jumpsig,IncSPsig,DecSPsig,PortWritesig,PortReadsig,MEMWsig,MEMRsig,SETCsig,CheckCsig,CheckNsig,CheckZsig,NoChecksig,RDsigbuf2,RSvalbuf2,RegWritesigEx,ImmediatesigEx,JumpsigEx,IncSPsigEx,DecSPsigEx,PortWritesigEx,PortReadsigEx,MEMWsigEx,MEMRsigEx,CheckCsigEx,CheckNsigEx,CheckZsigEx,NoChecksigEx,Resultsig,Carry,Zero,Negative);
+	dec: Decode port map(clk,OpCodesig,RDsig,RTval,RSval,Immsig,RDsigbuf,RSvalbuf,Op1sig,Op2sig,RegWritesig,Modesig,ALUEnablesig,Immediatesig,Jumpsig,IncSPsig,DecSPsig,PortWritesig,PortReadsig,MEMWsig,MEMRsig,SETCsig,Checksig);
+	ex: Execute port map(clk,RDsigbuf,RSvalbuf,Op1sig,Op2sig,RegWritesig,Modesig,ALUEnablesig,Immediatesig,Jumpsig,IncSPsig,DecSPsig,PortWritesig,PortReadsig,MEMWsig,MEMRsig,SETCsig,Checksig,RDsigbuf2,RSvalbuf2,RegWritesigEx,ImmediatesigEx,JumpsigEx,IncSPsigEx,DecSPsigEx,PortWritesigEx,PortReadsigEx,MEMWsigEx,MEMRsigEx,ChecksigEx,Resultsig,Carry,Zero,Negative);
 	memoryWB: MEMWB port map(clk,RegWritesigEx,PortWritesigEx,PortReadsigEx,MEMRsigEx,MemDataOut,IncSPsigEx,DecSPsigEx,Resultsig,RDsigbuf2,Addressbufmem,RegWritesigend,RDsigbufend,DataINbuf);
 END CPUArch;

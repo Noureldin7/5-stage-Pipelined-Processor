@@ -27,10 +27,7 @@ ENTITY Decode IS
 		MEMW : OUT std_logic;
 		MEMR : OUT std_logic;
 		SETC : OUT std_logic;
-		CheckC : OUT std_logic;
-		CheckN : OUT std_logic;
-		CheckZ : OUT std_logic;
-		NoCheck : OUT std_logic);
+		Checks : OUT std_logic_vector(1 downto 0));
 		
 END ENTITY Decode;
 
@@ -50,10 +47,7 @@ Component CU IS
 		MEMW : OUT std_logic;
 		MEMR : OUT std_logic;
 		SETC : OUT std_logic;
-		CheckC : OUT std_logic;
-		CheckN : OUT std_logic;
-		CheckZ : OUT std_logic;
-		NoCheck : OUT std_logic);
+		Checks : OUT std_logic_vector(1 downto 0));
 END Component;
 	signal RegWsig:std_logic := '0';
 	signal Modesig:std_logic_vector(1 downto 0) := (others=>'0');
@@ -67,19 +61,16 @@ END Component;
 	signal MemWsig:std_logic := '0';
 	signal MemRsig:std_logic := '0';
 	signal SETCsig:std_logic := '0';
-	signal ChkCsig:std_logic := '0';
-	signal ChkNsig:std_logic := '0';
-	signal ChkZsig:std_logic := '0';
-	signal NoChksig:std_logic := '0';
+	signal Chksig:std_logic_vector(1 downto 0) := (others=>'0');
 	BEGIN
-	ctrl: CU port map(OpCode,RegWsig,Modesig,ALUEsig,Immsig,Jmpsig,IncSPsig,DecSPsig,PortWsig,PortRsig,MemWsig,MemRsig,SETCsig,ChkCsig,ChkNsig,ChkZsig,NoChksig);
+	ctrl: CU port map(OpCode,RegWsig,Modesig,ALUEsig,Immsig,Jmpsig,IncSPsig,DecSPsig,PortWsig,PortRsig,MemWsig,MemRsig,SETCsig,Chksig);
 		Process(clk)
 		Begin
 			IF rising_edge(clk) then
 				RDbuf<=RD;
 				Op1<=RT;
 				if (Immsig='1') then
-					Op2<=SXT(Imm,32);
+					Op2<=EXT(Imm,32);
 				else
 					Op2<=RS;
 				end if;
@@ -96,10 +87,7 @@ END Component;
 				MEMW<=MemWsig;
 				MEMR<=MemRsig;
 				SETC<=SETCsig;
-				CheckC<=ChkCsig;
-				CheckN<=ChkNsig;
-				CheckZ<=ChkZsig;
-				NoCheck<=NoChksig;
+				Checks<=Chksig;
 			END IF;
 		END Process;
 END DecodeArch;
