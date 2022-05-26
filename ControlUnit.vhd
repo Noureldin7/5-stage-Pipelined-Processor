@@ -48,7 +48,7 @@ ARCHITECTURE CUArch OF CU IS
 		MEMR<= NOT OpCode(1) when OpCode(5)='1'
 		else '0';
 		ALUEnable<='1' when OpCode=("0001001") or OpCode=("0001101") or OpCode=("0001011") or OpCode=("1001001")
-		else '1' when OpCode=("0001111") or OpCode=("0001000")
+		else '1' when OpCode=("0001111") or OpCode=("1001000")
 		else '1' when OpCode=("1101001") or OpCode=("1100111")
 		else '0';
 END CUArch;

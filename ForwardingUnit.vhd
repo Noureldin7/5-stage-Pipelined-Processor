@@ -12,6 +12,7 @@ ENTITY FWDU IS
 		DstMEM : IN std_logic_vector(2 downto 0);
 		RegWALU : IN std_logic;
 		RegWMEM : IN std_logic;
+		Imm : IN std_logic;
 		ALUBuff : IN std_logic_vector(31 downto 0);
 		MemBuff : IN std_logic_vector(31 downto 0);
 		Op1 : OUT std_logic_vector(31 downto 0);
@@ -23,7 +24,7 @@ ARCHITECTURE FWDUArch OF FWDU IS
 		Op1<=ALUBuff when RegWALU='1'AND DstALU=SrcAdd1
 		else MemBuff when RegWMEM='1'AND DstMEM=SrcAdd1
 		else OrgOp1;
-		Op2<=ALUBuff when RegWALU='1'AND DstALU=SrcAdd2
-		else MemBuff when RegWMEM='1'AND DstMEM=SrcAdd2
+		Op2<=ALUBuff when RegWALU='1'AND DstALU=SrcAdd2 AND Imm='0'
+		else MemBuff when RegWMEM='1'AND DstMEM=SrcAdd2 AND Imm='0'
 		else OrgOp2;
 END FWDUArch;
