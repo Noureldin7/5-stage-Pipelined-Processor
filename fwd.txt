@@ -1,0 +1,14 @@
+add wave -position insertpoint sim:/cpu/*
+mem load -filltype value -filldata {92400012 } -fillradix hexadecimal /cpu/mem/Memory(1)
+mem load -filltype value -filldata 92880012 -fillradix hexadecimal /cpu/mem/Memory(2)
+force -freeze sim:/cpu/clk 0 0, 1 {50 ps} -r 100
+force -freeze sim:/cpu/Enable 1 0
+force -freeze sim:/cpu/rst 0 0
+run
+run
+run
+run
+run
+run
+run
+run

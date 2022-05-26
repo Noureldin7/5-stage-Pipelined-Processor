@@ -39,6 +39,8 @@ ARCHITECTURE CPUArch OF CPU IS
 	signal OpCodesig  : std_logic_vector(6 downto 0) := (others=>'0');
 	Signal Op1sig : std_logic_vector(31 downto 0) := (others=>'0');
 	Signal Op2sig : std_logic_vector(31 downto 0) := (others=>'0');
+	Signal Op1sigfwd : std_logic_vector(31 downto 0) := (others=>'0');
+	Signal Op2sigfwd : std_logic_vector(31 downto 0) := (others=>'0');
 	Signal PortReadsig : std_logic := '0';
 	Signal PortReadsigEx : std_logic := '0';
 	Signal PortWritesig : std_logic := '0';
@@ -52,10 +54,12 @@ ARCHITECTURE CPUArch OF CPU IS
 	Signal RegWritesigend :  std_logic := '0';
 	Signal Resultsig :  std_logic_vector(31 downto 0) := (others=>'0');
 	signal RSsig  : std_logic_vector(2 downto 0) := (others=>'0');
+	signal RSsigbuf  : std_logic_vector(2 downto 0) := (others=>'0');
 	signal RSval  : std_logic_vector(31 downto 0) := (others=>'0');
 	signal RSvalbuf  : std_logic_vector(31 downto 0) := (others=>'0');
 	signal RSvalbuf2  : std_logic_vector(31 downto 0) := (others=>'0');
 	signal RTsig  : std_logic_vector(2 downto 0) := (others=>'0');
+	signal RTsigbuf  : std_logic_vector(2 downto 0) := (others=>'0');
 	signal RTval  : std_logic_vector(31 downto 0) := (others=>'0');
 	Signal SETCsig : std_logic := '0';
 	Component Fetch IS
@@ -88,11 +92,15 @@ ARCHITECTURE CPUArch OF CPU IS
 		clk : IN std_logic;
 		OpCode  : IN std_logic_vector(6 downto 0);
 		RD : IN std_logic_vector(2 downto 0);
+		RTAdd : IN std_logic_vector(2 downto 0);
+		RSAdd : IN std_logic_vector(2 downto 0);
 		RT  : IN std_logic_vector(31 downto 0);
 		RS  : IN std_logic_vector(31 downto 0);
 		Imm  : IN std_logic_vector(15 downto 0);
 		RDbuf : OUT std_logic_vector(2 downto 0);
 		RSbuf : OUT std_logic_vector(31 downto 0);
+		RTAddbuf : OUT std_logic_vector(2 downto 0);
+		RSAddbuf : OUT std_logic_vector(2 downto 0);
 		Op1 : OUT std_logic_vector(31 downto 0);
 		Op2 : OUT std_logic_vector(31 downto 0);
 		RegWrite : OUT  std_logic;
@@ -107,8 +115,8 @@ ARCHITECTURE CPUArch OF CPU IS
 		MEMW : OUT std_logic;
 		MEMR : OUT std_logic;
 		SETC : OUT std_logic;
-		Checks : OUT std_logic_vector(1 downto 0));	
-	END Component;
+		Checks : OUT std_logic_vector(1 downto 0));
+END Component;
 	Component RegFile IS
 	PORT(
 		Add1 : IN  std_logic_vector(2 DOWNTO 0);
@@ -174,13 +182,29 @@ ARCHITECTURE CPUArch OF CPU IS
 		RDbuf  : OUT std_logic_vector(2 downto 0);
 		DataOut  : OUT std_logic_vector(31 downto 0));
 	END Component;
+	Component FWDU IS
+	PORT(
+		SrcAdd1 : IN  std_logic_vector(2 DOWNTO 0);
+		SrcAdd2 : IN  std_logic_vector(2 downto 0);
+		OrgOp1 : IN  std_logic_vector(31 DOWNTO 0);
+		OrgOp2 : IN  std_logic_vector(31 downto 0);
+		DstALU : IN std_logic_vector(2 downto 0);
+		DstMEM : IN std_logic_vector(2 downto 0);
+		RegWALU : IN std_logic;
+		RegWMEM : IN std_logic;
+		ALUBuff : IN std_logic_vector(31 downto 0);
+		MemBuff : IN std_logic_vector(31 downto 0);
+		Op1 : OUT std_logic_vector(31 downto 0);
+		Op2 : OUT std_logic_vector(31 downto 0));
+	END Component;
 	BEGIN
 	Addresssig<=Addressbufmem when (MEMWsigEx or MEMRsigEx)='1'
 	else Addressbuffet;
 	mem: Memory port map(clk,MEMWsigEx,MEMRsigEx,Addresssig,RSvalbuf2, MemDataOut);
 	fet: Fetch port map( MemDataOut,Resultsig,clk,rst,MEMRsigEx,JumpsigEx,Addressbuffet,Enable,OpCodesig,RDsig,RTsig,RSsig,Immsig);
 	reg: RegFile port map(RTsig,RSsig,RDsigbufend,DataINbuf,RegWritesigend,clk,RTval,RSval);
-	dec: Decode port map(clk,OpCodesig,RDsig,RTval,RSval,Immsig,RDsigbuf,RSvalbuf,Op1sig,Op2sig,RegWritesig,Modesig,ALUEnablesig,Immediatesig,Jumpsig,IncSPsig,DecSPsig,PortWritesig,PortReadsig,MEMWsig,MEMRsig,SETCsig,Checksig);
-	ex: Execute port map(clk,RDsigbuf,RSvalbuf,Op1sig,Op2sig,RegWritesig,Modesig,ALUEnablesig,Immediatesig,Jumpsig,IncSPsig,DecSPsig,PortWritesig,PortReadsig,MEMWsig,MEMRsig,SETCsig,Checksig,RDsigbuf2,RSvalbuf2,RegWritesigEx,ImmediatesigEx,JumpsigEx,IncSPsigEx,DecSPsigEx,PortWritesigEx,PortReadsigEx,MEMWsigEx,MEMRsigEx,ChecksigEx,Resultsig,Carry,Zero,Negative);
+	dec: Decode port map(clk,OpCodesig,RDsig,RTsig,RSsig,RTval,RSval,Immsig,RDsigbuf,RSvalbuf,RTsigbuf,RSsigbuf,Op1sig,Op2sig,RegWritesig,Modesig,ALUEnablesig,Immediatesig,Jumpsig,IncSPsig,DecSPsig,PortWritesig,PortReadsig,MEMWsig,MEMRsig,SETCsig,Checksig);
+	fwd: FWDU port map(RTsigbuf,RSsigbuf,Op1sig,Op2sig,RDsigbuf2,RDsigbufend,RegWritesigEx,RegWritesigend,Resultsig,DataINbuf,Op1sigfwd,Op2sigfwd);
+	ex: Execute port map(clk,RDsigbuf,RSvalbuf,Op1sigfwd,Op2sigfwd,RegWritesig,Modesig,ALUEnablesig,Immediatesig,Jumpsig,IncSPsig,DecSPsig,PortWritesig,PortReadsig,MEMWsig,MEMRsig,SETCsig,Checksig,RDsigbuf2,RSvalbuf2,RegWritesigEx,ImmediatesigEx,JumpsigEx,IncSPsigEx,DecSPsigEx,PortWritesigEx,PortReadsigEx,MEMWsigEx,MEMRsigEx,ChecksigEx,Resultsig,Carry,Zero,Negative);
 	memoryWB: MEMWB port map(clk,RegWritesigEx,PortWritesigEx,PortReadsigEx,MEMRsigEx,MemDataOut,IncSPsigEx,DecSPsigEx,Resultsig,RDsigbuf2,Addressbufmem,RegWritesigend,RDsigbufend,DataINbuf);
 END CPUArch;

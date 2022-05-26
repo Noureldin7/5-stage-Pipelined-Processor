@@ -8,11 +8,15 @@ ENTITY Decode IS
 		clk : IN std_logic;
 		OpCode  : IN std_logic_vector(6 downto 0);
 		RD : IN std_logic_vector(2 downto 0);
+		RTAdd : IN std_logic_vector(2 downto 0);
+		RSAdd : IN std_logic_vector(2 downto 0);
 		RT  : IN std_logic_vector(31 downto 0);
 		RS  : IN std_logic_vector(31 downto 0);
 		Imm  : IN std_logic_vector(15 downto 0);
 		RDbuf : OUT std_logic_vector(2 downto 0);
 		RSbuf : OUT std_logic_vector(31 downto 0);
+		RTAddbuf : OUT std_logic_vector(2 downto 0);
+		RSAddbuf : OUT std_logic_vector(2 downto 0);
 		Op1 : OUT std_logic_vector(31 downto 0);
 		Op2 : OUT std_logic_vector(31 downto 0);
 		RegWrite : OUT  std_logic;
@@ -28,7 +32,6 @@ ENTITY Decode IS
 		MEMR : OUT std_logic;
 		SETC : OUT std_logic;
 		Checks : OUT std_logic_vector(1 downto 0));
-		
 END ENTITY Decode;
 
 ARCHITECTURE DecodeArch OF Decode IS
@@ -75,6 +78,8 @@ END Component;
 					Op2<=RS;
 				end if;
 				RSbuf<=RS;
+				RTAddbuf<=RTAdd;
+				RSAddbuf<=RSAdd;
 				RegWrite<=RegWsig;
 				Mode<=Modesig;
 				AluEnable<=ALUEsig;
