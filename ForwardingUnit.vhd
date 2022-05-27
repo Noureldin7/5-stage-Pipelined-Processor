@@ -1,30 +1,34 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_arith.ALL;
-USE IEEE.numeric_std.all;
+USE IEEE.numeric_std.ALL;
 ENTITY FWDU IS
-	PORT(
-		SrcAdd1 : IN  std_logic_vector(2 DOWNTO 0);
-		SrcAdd2 : IN  std_logic_vector(2 downto 0);
-		OrgOp1 : IN  std_logic_vector(31 DOWNTO 0);
-		OrgOp2 : IN  std_logic_vector(31 downto 0);
-		DstALU : IN std_logic_vector(2 downto 0);
-		DstMEM : IN std_logic_vector(2 downto 0);
-		RegWALU : IN std_logic;
-		RegWMEM : IN std_logic;
-		Imm : IN std_logic;
-		ALUBuff : IN std_logic_vector(31 downto 0);
-		MemBuff : IN std_logic_vector(31 downto 0);
-		Op1 : OUT std_logic_vector(31 downto 0);
-		Op2 : OUT std_logic_vector(31 downto 0));
+	PORT (
+		SrcAdd1 : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		SrcAdd2 : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		OrgOp1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		OrgOp2 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		DstALU : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		DstMEM : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		RegWALU : IN STD_LOGIC;
+		RegWMEM : IN STD_LOGIC;
+		Imm : IN STD_LOGIC;
+		ALUBuff : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		MemBuff : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Op1 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Op2 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0));
 END ENTITY FWDU;
 
 ARCHITECTURE FWDUArch OF FWDU IS
-	BEGIN
-		Op1<=ALUBuff when RegWALU='1'AND DstALU=SrcAdd1
-		else MemBuff when RegWMEM='1'AND DstMEM=SrcAdd1
-		else OrgOp1;
-		Op2<=ALUBuff when RegWALU='1'AND DstALU=SrcAdd2 AND Imm='0'
-		else MemBuff when RegWMEM='1'AND DstMEM=SrcAdd2 AND Imm='0'
-		else OrgOp2;
+BEGIN
+	Op1 <= ALUBuff WHEN RegWALU = '1'AND DstALU = SrcAdd1
+		ELSE
+		MemBuff WHEN RegWMEM = '1'AND DstMEM = SrcAdd1
+		ELSE
+		OrgOp1;
+	Op2 <= ALUBuff WHEN RegWALU = '1'AND DstALU = SrcAdd2 AND Imm = '0'
+		ELSE
+		MemBuff WHEN RegWMEM = '1'AND DstMEM = SrcAdd2 AND Imm = '0'
+		ELSE
+		OrgOp2;
 END FWDUArch;
