@@ -58,14 +58,19 @@ ARCHITECTURE ExArch OF Execute IS
 	END COMPONENT;
 BEGIN
 	ex : ALU PORT MAP(Op1, Op2, Mode, ALUEnable, SETC, Resultsig, ALUC, ALUZ, ALUN);
+	Zero <= '0' WHEN Checks = ("00")
+		ELSE
+		ALUZ;
+	Negative <= '0' WHEN Checks = ("01")
+		ELSE
+		ALUN;
+	Carry <= '0' WHEN Checks = ("10")
+		ELSE
+		ALUC;
 	PROCESS (clk)
 	BEGIN
-		IF rising_edge(clk) THEN
-			RDbuf <= RD;
-			RSbuf <= RS;
-			RegWritebuf <= RegWrite;
-			Immediatebuf <= Immediate;
-			IF (MemWrite OR MEMRead) = '0' THEN
+		IF falling_edge(clk) THEN
+			IF (MemWrite OR MEMRead) = '0' AND (ALUEnable = '1' OR Checks /= ("11")) THEN
 				IF Checks = ("00") THEN
 					Jumpbuf <= Jump AND Zerosig;
 					Zerosig <= '0';
@@ -88,6 +93,12 @@ BEGIN
 					Carrysig <= ALUC;
 				END IF;
 			END IF;
+		END IF;
+		IF rising_edge(clk) THEN
+			RDbuf <= RD;
+			RSbuf <= RS;
+			RegWritebuf <= RegWrite;
+			Immediatebuf <= Immediate;
 			IncSPbuf <= IncSP;
 			DecSPbuf <= DecSP;
 			PortWritebuf <= PortWrite;
@@ -96,9 +107,6 @@ BEGIN
 			MEMRbuf <= MemRead;
 			Checksbuf <= Checks;
 			Result <= Resultsig;
-			Carry <= Carrysig;
-			Zero <= Zerosig;
-			Negative <= Negativesig;
 		END IF;
 	END PROCESS;
 END ExArch;

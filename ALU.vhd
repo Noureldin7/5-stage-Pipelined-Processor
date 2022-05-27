@@ -28,25 +28,16 @@ BEGIN
 		unsigned(OpA AND OpB) WHEN Mode = ("11") AND Enable = '1'
 		ELSE
 		unsigned(NOT OpA) WHEN Mode = ("10") AND Enable = '1';
-	C <= '1' WHEN (unsigned(OpA) + unsigned(OpB) < unsigned(OpA)) AND Mode = ("00") AND Enable = '1'
+	Carry <= '1' WHEN (unsigned(OpA) + unsigned(OpB) < unsigned(OpA)) AND Mode = ("00") AND Enable = '1'
 		ELSE
 		'1' WHEN (unsigned(OpA) > unsigned(OpB)) AND Mode = ("10") AND Enable = '1'
 		ELSE
 		'1' WHEN SETC = '1'
 		ELSE
-		C WHEN Mode = ("01") OR Mode = ("11") OR Enable = '0'
-		ELSE
 		'0';
-	N <= STD_LOGIC(Temp(31)) WHEN Enable = '1'
+	Negative <= STD_LOGIC(Temp(31)) WHEN Enable = '1';
+	Zero <= '1' WHEN Temp = 0 AND Enable = '1'
 		ELSE
-		N;
-	Z <= '1' WHEN Temp = 0 AND Enable = '1'
-		ELSE
-		'0' WHEN Temp > 0 AND Enable = '1'
-		ELSE
-		Z WHEN Enable = '0';
+		'0' WHEN Temp > 0 AND Enable = '1';
 	Result <= STD_LOGIC_VECTOR(Temp);
-	Carry <= C;
-	Negative <= N;
-	Zero <= Z;
 END ALUArch;
