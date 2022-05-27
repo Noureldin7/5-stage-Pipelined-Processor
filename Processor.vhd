@@ -70,7 +70,7 @@ ARCHITECTURE CPUArch OF CPU IS
 		rst  : IN  std_logic;
 		MemRead  : IN  std_logic;
 		CheckedJump  : IN  std_logic;
-		Add : OUT std_logic_vector(19 downto 0);
+		Address : OUT std_logic_vector(19 downto 0);
 		Enable  : IN  std_logic;
 		OpCode  : OUT std_logic_vector(6 downto 0);
 		RD  : OUT std_logic_vector(2 downto 0);

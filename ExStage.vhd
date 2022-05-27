@@ -42,6 +42,7 @@ END ENTITY Execute;
 
 ARCHITECTURE ExArch OF Execute IS
 	Signal Carrysig,Zerosig,Negativesig:std_logic := '0';
+	Signal ALUC,ALUZ,ALUN:std_logic := '0';
 	Signal Resultsig:std_logic_vector(31 downto 0) := (others=>'0');
 	Component ALU IS
 	PORT(
@@ -56,7 +57,7 @@ ARCHITECTURE ExArch OF Execute IS
 		Negative : OUT std_logic);
 	END Component;
 	BEGIN
-	ex: ALU port map(Op1,Op2,Mode,ALUEnable,SETC,Resultsig,Carrysig,Zerosig,Negativesig);
+	ex: ALU port map(Op1,Op2,Mode,ALUEnable,SETC,Resultsig,ALUC,ALUZ,ALUN);
 	Process(clk)
 		Begin
 			IF rising_edge(clk) then
@@ -66,12 +67,24 @@ ARCHITECTURE ExArch OF Execute IS
 				Immediatebuf<=Immediate;
 				IF Checks=("00") then
 					Jumpbuf<=Jump and Zerosig;
+					Zerosig<='0';
+					Negativesig<=ALUN;
+					Carrysig<=ALUC;
 				ELSIF Checks=("01") then
 					Jumpbuf<=Jump and Negativesig;
+					Zerosig<=ALUZ;
+					Negativesig<='0';
+					Carrysig<=ALUC;
 				ELSIF Checks=("10") then
 					Jumpbuf<=Jump and Carrysig;
+					Zerosig<=ALUZ;
+					Negativesig<=ALUN;
+					Carrysig<='0';
 				ELSE
 					Jumpbuf<=Jump;
+					Zerosig<=ALUZ;
+					Negativesig<=ALUN;
+					Carrysig<=ALUC;
 				END IF;
 				IncSPbuf<=IncSP;
 				DecSPbuf<=DecSP;

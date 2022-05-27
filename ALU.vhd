@@ -20,19 +20,19 @@ ARCHITECTURE ALUArch OF ALU IS
 	Signal Temp:unsigned(31 downto 0) := (others=>'0');
 	BEGIN
 		Temp<=unsigned(OpB) when Enable='0'
-		else unsigned(OpA)+unsigned(OpB) when Mode=("00")
-		else unsigned(OpA)-unsigned(OpB) when Mode=("01")
-		else unsigned(OpA AND OpB) when Mode=("11")
-		else unsigned(Not OpA);
-		C<='1' when (unsigned(OpA)+unsigned(OpB)<unsigned(OpA)) AND Mode=("00")
-		else '1' when (unsigned(OpA)>unsigned(OpB)) AND Mode=("10")
+		else unsigned(OpA)+unsigned(OpB) when Mode=("00") AND Enable='1'
+		else unsigned(OpA)-unsigned(OpB) when Mode=("01") AND Enable='1'
+		else unsigned(OpA AND OpB) when Mode=("11") AND Enable='1'
+		else unsigned(Not OpA) when Mode=("10") AND Enable='1';
+		C<='1' when (unsigned(OpA)+unsigned(OpB)<unsigned(OpA)) AND Mode=("00") AND Enable='1'
+		else '1' when (unsigned(OpA)>unsigned(OpB)) AND Mode=("10") AND Enable='1'
 		else '1' when SETC='1'
 		else C when Mode=("01") OR Mode=("11") OR Enable='0'
 		else '0';
 		N<=std_logic(Temp(31)) when Enable='1'
 		else N;
-		Z<='1' when Temp=0
-		else '0' when Temp>0
+		Z<='1' when Temp=0 AND Enable='1'
+		else '0' when Temp>0 AND Enable='1'
 		else Z when Enable='0';
 		Result<=std_logic_vector(Temp);
 		Carry<=C;
