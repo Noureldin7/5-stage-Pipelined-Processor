@@ -65,26 +65,28 @@ BEGIN
 			RSbuf <= RS;
 			RegWritebuf <= RegWrite;
 			Immediatebuf <= Immediate;
-			IF Checks = ("00") THEN
-				Jumpbuf <= Jump AND Zerosig;
-				Zerosig <= '0';
-				Negativesig <= ALUN;
-				Carrysig <= ALUC;
-			ELSIF Checks = ("01") THEN
-				Jumpbuf <= Jump AND Negativesig;
-				Zerosig <= ALUZ;
-				Negativesig <= '0';
-				Carrysig <= ALUC;
-			ELSIF Checks = ("10") THEN
-				Jumpbuf <= Jump AND Carrysig;
-				Zerosig <= ALUZ;
-				Negativesig <= ALUN;
-				Carrysig <= '0';
-			ELSE
-				Jumpbuf <= Jump;
-				Zerosig <= ALUZ;
-				Negativesig <= ALUN;
-				Carrysig <= ALUC;
+			IF (MemWrite OR MEMRead) = '0' THEN
+				IF Checks = ("00") THEN
+					Jumpbuf <= Jump AND Zerosig;
+					Zerosig <= '0';
+					Negativesig <= ALUN;
+					Carrysig <= ALUC;
+				ELSIF Checks = ("01") THEN
+					Jumpbuf <= Jump AND Negativesig;
+					Zerosig <= ALUZ;
+					Negativesig <= '0';
+					Carrysig <= ALUC;
+				ELSIF Checks = ("10") THEN
+					Jumpbuf <= Jump AND Carrysig;
+					Zerosig <= ALUZ;
+					Negativesig <= ALUN;
+					Carrysig <= '0';
+				ELSE
+					Jumpbuf <= Jump;
+					Zerosig <= ALUZ;
+					Negativesig <= ALUN;
+					Carrysig <= ALUC;
+				END IF;
 			END IF;
 			IncSPbuf <= IncSP;
 			DecSPbuf <= DecSP;
