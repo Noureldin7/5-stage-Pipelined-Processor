@@ -24,7 +24,7 @@ ARCHITECTURE MEMWBArch OF MEMWB IS
 	Type Ports IS Array (0 to 0) of unsigned(31 downto 0);
 	signal InPort : Ports := (others=>(others=>'0'));
 	signal OutPort : Ports := (others=>(others=>'0'));
-	signal StackPtr : unsigned(31 downto 0) := (others=>'0');
+	signal StackPtr : unsigned(31 downto 0) := (others=>'1');
 	BEGIN
 		Process(clk)
 		Begin
@@ -36,14 +36,15 @@ ARCHITECTURE MEMWBArch OF MEMWB IS
 				ELSE
 				DataOut<=Result;
 				END IF;
-				IF IncSP = '1' then 
-				StackPtr<=StackPtr+1;
-				ELSIF DecSP='1' then
+				IF DecSP='1' then
 				StackPtr<=StackPtr-1;
 				END IF;
 				RegWritebuf<=RegWrite;
 				RDbuf<=RD;
 			ELSIF falling_edge(clk) then
+				IF IncSP = '1' then
+				StackPtr<=StackPtr+1;
+				END IF;
 				IF PortWrite='1' then
 				OutPort(0)<=unsigned(Result);
 				END IF;
