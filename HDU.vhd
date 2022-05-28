@@ -33,8 +33,8 @@ ENTITY HDU IS
         Imm_2 : IN STD_LOGIC_VECTOR(31 DOWNTO 0); --forwarded val
 
         EN : OUT STD_LOGIC; --PC enable
-        Swap_Hazard : OUT STD_LOGIC; --A fucking flag
-        Load_Use : OUT STD_LOGIC --Another fucking flag
+        Swap_Hazard : OUT STD_LOGIC; 
+        Load_Use : OUT STD_LOGIC 
     );
 END ENTITY;
 
