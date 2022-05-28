@@ -14,7 +14,7 @@ ENTITY Decode IS
 		RSAdd : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 		RT : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		RS : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		Imm : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
+		Imm : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		RDbuf : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		RSbuf : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		RTAddbuf : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -33,7 +33,10 @@ ENTITY Decode IS
 		MEMW : OUT STD_LOGIC;
 		MEMR : OUT STD_LOGIC;
 		SETC : OUT STD_LOGIC;
-		Checks : OUT STD_LOGIC_VECTOR(1 DOWNTO 0));
+		Checks : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
+		Imm_Flag : OUT STD_LOGIC
+		);
+		
 END ENTITY Decode;
 
 ARCHITECTURE DecodeArch OF Decode IS
@@ -69,6 +72,7 @@ ARCHITECTURE DecodeArch OF Decode IS
 	SIGNAL Chksig : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
 BEGIN
 	ctrl : CU PORT MAP(OpCode, RegWsig, Modesig, ALUEsig, Immsig, Jmpsig, IncSPsig, DecSPsig, PortWsig, PortRsig, MemWsig, MemRsig, SETCsig, Chksig);
+	Imm_Flag <= Immsig;
 	PROCESS (clk, rst)
 	BEGIN
 		IF rst = '1' THEN

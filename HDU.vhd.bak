@@ -8,7 +8,7 @@ ENTITY HDU IS
         r_FD_RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         r_FD_RT : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         r_FD_RS : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
-        r_FD_Imm : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+        r_FD_Imm : IN STD_LOGIC_VECTOR(15 DOWNTO 0);
 
         r_DE_RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0); --values from decode execute buffer
         r_DE_RT : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -18,17 +18,17 @@ ENTITY HDU IS
         r_EM_MEMR : IN STD_LOGIC;
         r_EM_MEMW : IN STD_LOGIC;
 
-        Imm_1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0); --forwarded val
-        Imm_2 : IN STD_LOGIC_VECTOR(31 DOWNTO 0); --forwarded val
+        Imm_1 : IN STD_LOGIC_VECTOR(15 DOWNTO 0); --forwarded val
+        Imm_2 : IN STD_LOGIC_VECTOR(15 DOWNTO 0); --forwarded val
 
-        Ins_In : IN STD_LOGIC_VECTOR(47 DOWNTO 0); -- Ins from mem
-        Ins_Out : OUT STD_LOGIC_VECTOR(47 DOWNTO 0); -- Ins to fetch decode buffer
+        Ins_In : IN STD_LOGIC_VECTOR(31 DOWNTO 0); -- Ins from mem
+        Ins_Out : OUT STD_LOGIC_VECTOR(31 DOWNTO 0); -- Ins to fetch decode buffer
 
         w_DE_OpCode : OUT STD_LOGIC_VECTOR(6 DOWNTO 0); --values to decode execute buffer and CU
         w_DE_RD : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
         w_DE_RT : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
         w_DE_RS : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
-        w_DE_Imm : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+        w_DE_Imm : OUT STD_LOGIC_VECTOR(15 DOWNTO 0);
 
         EN : OUT STD_LOGIC; --PC enable
         Swap_Hazard : OUT STD_LOGIC;
@@ -58,62 +58,49 @@ BEGIN
     BEGIN
         IF (HLT_Signal = '1' OR r_EM_MEMR = '1' OR r_EM_MEMW = '1') THEN
             EN <= '0';
-            IF (Load_Use_Signal = '1') THEN
-                Ins_Out <= (OTHERS => '0');
-                w_DE_OpCode <= (OTHERS => '0');
-                w_DE_RD <= (OTHERS => '0');
-                w_DE_RT <= (OTHERS => '0');
-                w_DE_RS <= (OTHERS => '0');
-                w_DE_Imm <= (OTHERS => '0');
-            ELSIF (Swap_Hazard_Signal = '1') THEN
-                Ins_Out <= "1001100" &
-                    r_FD_RS &
-                    ("000000") &
-                    Imm_1;
-                w_DE_OpCode <= "1001100";
-                w_DE_RD <= r_FD_RT;
-                w_DE_RT <= (OTHERS => '0');
-                w_DE_RS <= (OTHERS => '0');
-                w_DE_Imm <= Imm_2;
-            ELSE
-                Ins_Out <= (OTHERS => '0');
-                w_DE_OpCode <= r_FD_OpCode;
-                w_DE_RD <= r_FD_RD;
-                w_DE_RT <= r_FD_RT;
-                w_DE_RS <= r_FD_RS;
-                w_DE_Imm <= r_FD_Imm;
-            END IF;
+
+            Ins_Out <= (OTHERS => '0');
+
+            w_DE_OpCode <= r_FD_OpCode;
+            w_DE_RD <= r_FD_RD;
+            w_DE_RT <= r_FD_RT;
+            w_DE_RS <= r_FD_RS;
+            w_DE_Imm <= r_FD_Imm;
 
         ELSIF (Load_Use_Signal = '1') THEN
             EN <= '0';
 
-            Ins_Out <= Ins_In;
+            Ins_Out <= Ins_In;--r_FD_OpCode &
+            --r_FD_RD &
+            --r_FD_RT &
+            --r_FD_RS &
+            --r_FD_Imm;
+
             w_DE_OpCode <= (OTHERS => '0');
             w_DE_RD <= (OTHERS => '0');
             w_DE_RT <= (OTHERS => '0');
             w_DE_RS <= (OTHERS => '0');
-            w_DE_Imm <= (OTHERS => '0');
 
         ELSIF (Swap_Hazard_Signal = '1') THEN
             EN <= '0';
 
-            Ins_Out <= "1001100" &
+            Ins_Out <= "0101100" &
                 r_FD_RS &
-                ("000000") &
-                Imm_1;
+                ("XXXXXX") &
+                Imm_2;
 
-            w_DE_OpCode <= "1001100";
-            w_DE_RD <= r_FD_RT;
-            w_DE_RT <= (OTHERS => '0');
-            w_DE_RS <= (OTHERS => '0');
-            w_DE_Imm <= Imm_2;
+            w_DE_OpCode <= "0101100";
+            w_DE_RD <= r_FD_RD;
+            w_DE_RT <= (OTHERS => 'X');
+            w_DE_RS <= (OTHERS => 'X');
+            w_DE_Imm <= Imm_1;
 
         ELSE
             EN <= '1';
 
             Ins_Out <= Ins_In;
 
-            w_DE_OpCode <= r_FD_OpCode;
+            w_DE_RD <= r_FD_OpCode;
             w_DE_RD <= r_FD_RD;
             w_DE_RT <= r_FD_RT;
             w_DE_RS <= r_FD_RS;

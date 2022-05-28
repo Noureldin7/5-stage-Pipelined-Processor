@@ -40,7 +40,7 @@ ENTITY Execute IS
 		Carry : OUT STD_LOGIC;
 		Zero : OUT STD_LOGIC;
 		Negative : OUT STD_LOGIC;
-		Unbuffered_Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+		Unbuffered_Result : STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 END ENTITY Execute;
 
