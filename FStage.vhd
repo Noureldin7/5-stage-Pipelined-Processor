@@ -9,7 +9,7 @@ ENTITY Fetch IS
 		intr : IN STD_LOGIC;
 		Ins : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		JumpAddress : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-		MemRead : IN STD_LOGIC;
+		Mem : IN STD_LOGIC;
 		CheckedJump : IN STD_LOGIC;
 		Address : OUT STD_LOGIC_VECTOR(19 DOWNTO 0);
 		OpCode : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
@@ -50,7 +50,7 @@ BEGIN
 	PROCESS (clk)
 	BEGIN
 		IF rising_edge(clk) AND intr = '0' THEN
-			IF MemRead = '1' OR rst = '1' THEN
+			IF Mem = '1' OR rst = '1' THEN
 				OpCode <= (OTHERS => '0');
 				RD <= (OTHERS => '0');
 				RT <= (OTHERS => '0');
@@ -67,7 +67,7 @@ BEGIN
 	END PROCESS;
 	PROCESS (clk)
 	BEGIN
-		IF falling_edge(clk) AND MemRead /= '1' THEN
+		IF falling_edge(clk) AND Mem /= '1' THEN
 			IF Enable = '1' THEN
 				pcsigout <= pcsigin;
 			END IF;

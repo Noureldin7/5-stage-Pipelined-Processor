@@ -39,6 +39,7 @@ ARCHITECTURE CPUArch OF CPU IS
 	SIGNAL MemDataOut : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL MEMRsig : STD_LOGIC := '0';
 	SIGNAL MEMRsigEx : STD_LOGIC := '0';
+	SIGNAL Memsig : STD_LOGIC := '0';
 	SIGNAL MEMW : STD_LOGIC := '0';
 	SIGNAL MEMWsig : STD_LOGIC := '0';
 	SIGNAL MEMWsigEx : STD_LOGIC := '0';
@@ -77,7 +78,7 @@ ARCHITECTURE CPUArch OF CPU IS
 			intr : IN STD_LOGIC;
 			Ins : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			JumpAddress : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			MemRead : IN STD_LOGIC;
+			Mem : IN STD_LOGIC;
 			CheckedJump : IN STD_LOGIC;
 			Address : OUT STD_LOGIC_VECTOR(19 DOWNTO 0);
 			OpCode : OUT STD_LOGIC_VECTOR(6 DOWNTO 0);
@@ -246,11 +247,12 @@ BEGIN
 	MEMW <= '1' WHEN intr = '1' AND clk = '1'
 		ELSE
 		MEMWsigEx;
+	Memsig <= MEMW OR MEMRsigEx;
 	Ins <= intrinssig WHEN intr = '1'
 		ELSE
 		MemDataOut;
 	mem : Memory PORT MAP(clk, MEMW, MEMRsigEx, Addresssig, MemDataIn, MemDataOut);
-	fet : Fetch PORT MAP(clk, rstsig, intr, Ins, Resultsig, MEMRsigEx, JumpsigEx, Addressbuffet, OpCodesig, RDsig, RTsig, RSsig, Immsig);
+	fet : Fetch PORT MAP(clk, rstsig, intr, Ins, Resultsig, Memsig, JumpsigEx, Addressbuffet, OpCodesig, RDsig, RTsig, RSsig, Immsig);
 	reg : RegFile PORT MAP(RTsig, RSsig, RDsigbufend, DataINbuf, RegWritesigend, clk, RTval, RSval);
 	dec : Decode PORT MAP(clk, rstsig, intr, OpCodesig, RDsig, RTsig, RSsig, RTval, RSval, Immsig, RDsigbuf, RSvalbuf, RTsigbuf, RSsigbuf, Op1sig, Op2sig, RegWritesig, Modesig, ALUEnablesig, Immediatesig, Jumpsig, IncSPsig, DecSPsig, PortWritesig, PortReadsig, MEMWsig, MEMRsig, SETCsig, Checksig);
 	fwd : FWDU PORT MAP(RTsigbuf, RSsigbuf, Op1sig, Op2sig, RDsigbuf2, RDsigbufend, RegWritesigEx, RegWritesigend, Immediatesig, Resultsig, DataINbuf, Op1sigfwd, Op2sigfwd);
