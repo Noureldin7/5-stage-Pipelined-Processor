@@ -12,7 +12,7 @@ ENTITY CPU IS
 		Negative : OUT STD_LOGIC);
 END ENTITY CPU;
 ARCHITECTURE CPUArch OF CPU IS
-	SIGNAL Addressbuffet : STD_LOGIC_VECTOR(19 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL Addressbuffer : STD_LOGIC_VECTOR(19 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL Addressbufmem : STD_LOGIC_VECTOR(19 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL Addresssig : STD_LOGIC_VECTOR(19 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL ALUEnablesig : STD_LOGIC := '0';
@@ -200,9 +200,9 @@ ARCHITECTURE CPUArch OF CPU IS
 BEGIN
 	Addresssig <= Addressbufmem WHEN (MEMWsigEx OR MEMRsigEx) = '1'
 		ELSE
-		Addressbuffet;
+		Addressbuffer;
 	mem : Memory PORT MAP(clk, MEMWsigEx, MEMRsigEx, Addresssig, RSvalbuf2, MemDataOut);
-	fet : Fetch PORT MAP(MemDataOut, Resultsig, clk, rst, MEMRsigEx, JumpsigEx, Addressbuffet, OpCodesig, RDsig, RTsig, RSsig, Immsig);
+	fet : Fetch PORT MAP(MemDataOut, Resultsig, clk, rst, MEMRsigEx, JumpsigEx, Addressbuffer, OpCodesig, RDsig, RTsig, RSsig, Immsig);
 	reg : RegFile PORT MAP(RTsig, RSsig, RDsigbufend, DataINbuf, RegWritesigend, clk, RTval, RSval);
 	dec : Decode PORT MAP(clk, OpCodesig, RDsig, RTsig, RSsig, RTval, RSval, Immsig, RDsigbuf, RSvalbuf, RTsigbuf, RSsigbuf, Op1sig, Op2sig, RegWritesig, Modesig, ALUEnablesig, Immediatesig, Jumpsig, IncSPsig, DecSPsig, PortWritesig, PortReadsig, MEMWsig, MEMRsig, SETCsig, Checksig);
 	fwd : FWDU PORT MAP(RTsigbuf, RSsigbuf, Op1sig, Op2sig, RDsigbuf2, RDsigbufend, RegWritesigEx, RegWritesigend, Immediatesig, Resultsig, DataINbuf, Op1sigfwd, Op2sigfwd);
