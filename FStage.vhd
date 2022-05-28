@@ -23,11 +23,11 @@ ARCHITECTURE FetchArch OF Fetch IS
 	SIGNAL rdsig : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL rtsig : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL rssig : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
-	SIGNAL rstsig : STD_LOGIC := '0';
+	SIGNAL rstsig : STD_LOGIC := '0'; --reset signal 
 	SIGNAL immsig : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL pcsigout : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL pcsigin : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
-	SIGNAL add4sig : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL add4sig : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0'); -- Adds 1 to the PC 
 	SIGNAL Enable : STD_LOGIC := '1';
 BEGIN
 	opsig <= Ins(31 DOWNTO 25);
@@ -41,7 +41,7 @@ BEGIN
 		pcsigout(19 DOWNTO 0);
 	pcsigin <= JumpAddress WHEN CheckedJump = '1'
 		ELSE
-		Ins WHEN rstsig = '1'
+		Ins WHEN rstsig = '1' -- start with address 0 in memory 
 		ELSE
 		add4sig;
 	PROCESS (clk)
@@ -72,7 +72,7 @@ BEGIN
 	END PROCESS;
 	PROCESS (clk)
 	BEGIN
-		IF falling_edge(clk) AND MemRead /= '1' THEN
+		IF falling_edge(clk) AND MemRead /= '1' THEN 
 			IF Enable = '1' THEN
 				pcsigout <= pcsigin;
 			END IF;
