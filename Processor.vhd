@@ -1,11 +1,13 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
+USE IEEE.STD_LOGIC_ARITH.ALL;
 USE IEEE.numeric_std.ALL;
 
 ENTITY CPU IS
 	PORT (
 		clk : IN STD_LOGIC;
 		rst : IN STD_LOGIC;
+		intr : IN STD_LOGIC;
 		Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		Carry : OUT STD_LOGIC;
 		Zero : OUT STD_LOGIC;
@@ -28,11 +30,16 @@ ARCHITECTURE CPUArch OF CPU IS
 	SIGNAL ImmsigEx : STD_LOGIC_VECTOR(15 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL IncSPsig : STD_LOGIC := '0';
 	SIGNAL IncSPsigEx : STD_LOGIC := '0';
+	SIGNAL Ins : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL intrsig : STD_LOGIC := '0';
+	SIGNAL intrinssig : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL Jumpsig : STD_LOGIC := '0';
 	SIGNAL JumpsigEx : STD_LOGIC := '0';
+	SIGNAL MemDataIn : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL MemDataOut : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL MEMRsig : STD_LOGIC := '0';
 	SIGNAL MEMRsigEx : STD_LOGIC := '0';
+	SIGNAL MEMW : STD_LOGIC := '0';
 	SIGNAL MEMWsig : STD_LOGIC := '0';
 	SIGNAL MEMWsigEx : STD_LOGIC := '0';
 	SIGNAL Modesig : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
@@ -53,6 +60,7 @@ ARCHITECTURE CPUArch OF CPU IS
 	SIGNAL RegWritesigEx : STD_LOGIC := '0';
 	SIGNAL RegWritesigend : STD_LOGIC := '0';
 	SIGNAL Resultsig : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL rstsig : STD_LOGIC := '0';
 	SIGNAL RSsig : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL RSsigbuf : STD_LOGIC_VECTOR(2 DOWNTO 0) := (OTHERS => '0');
 	SIGNAL RSval : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
@@ -64,10 +72,11 @@ ARCHITECTURE CPUArch OF CPU IS
 	SIGNAL SETCsig : STD_LOGIC := '0';
 	COMPONENT Fetch IS
 		PORT (
-			Ins : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
-			JumpAddress : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			clk : IN STD_LOGIC;
 			rst : IN STD_LOGIC;
+			intr : IN STD_LOGIC;
+			Ins : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
+			JumpAddress : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			MemRead : IN STD_LOGIC;
 			CheckedJump : IN STD_LOGIC;
 			Address : OUT STD_LOGIC_VECTOR(19 DOWNTO 0);
@@ -89,6 +98,8 @@ ARCHITECTURE CPUArch OF CPU IS
 	COMPONENT Decode IS
 		PORT (
 			clk : IN STD_LOGIC;
+			rst : IN STD_LOGIC;
+			intr : IN STD_LOGIC;
 			OpCode : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
 			RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 			RTAdd : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -130,6 +141,8 @@ ARCHITECTURE CPUArch OF CPU IS
 	COMPONENT Execute IS
 		PORT (
 			clk : IN STD_LOGIC;
+			rst : IN STD_LOGIC;
+			intr : IN STD_LOGIC;
 			RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 			RS : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 			Op1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -167,6 +180,8 @@ ARCHITECTURE CPUArch OF CPU IS
 	COMPONENT MEMWB IS
 		PORT (
 			clk : IN STD_LOGIC;
+			rst : IN STD_LOGIC;
+			intr : IN STD_LOGIC;
 			RegWrite : IN STD_LOGIC;
 			PortWrite : IN STD_LOGIC;
 			PortRead : IN STD_LOGIC;
@@ -198,14 +213,47 @@ ARCHITECTURE CPUArch OF CPU IS
 			Op2 : OUT STD_LOGIC_VECTOR(31 DOWNTO 0));
 	END COMPONENT;
 BEGIN
-	Addresssig <= Addressbufmem WHEN (MEMWsigEx OR MEMRsigEx) = '1'
+	PROCESS (rst, clk)
+	BEGIN
+		IF rising_edge(rst) THEN
+			rstsig <= '1';
+		ELSIF falling_edge(clk) AND rst = '0' THEN
+			rstsig <= '0';
+		END IF;
+	END PROCESS;
+	PROCESS (intr, clk)
+	BEGIN
+		IF rising_edge(intr) THEN
+			intrsig <= '1';
+		ELSIF falling_edge(clk) AND intr = '0' THEN
+			intrsig <= '0';
+		END IF;
+	END PROCESS;
+	PROCESS (clk)
+	BEGIN
+		IF rising_edge(clk) THEN
+			intrinssig <= MemDataOut;
+		END IF;
+	END PROCESS;
+	Addresssig <= Addressbufmem WHEN (MEMW OR MEMRsigEx) = '1'
+		ELSE
+		(0 => '1', OTHERS => '0') WHEN intr = '1'
 		ELSE
 		Addressbuffet;
-	mem : Memory PORT MAP(clk, MEMWsigEx, MEMRsigEx, Addresssig, RSvalbuf2, MemDataOut);
-	fet : Fetch PORT MAP(MemDataOut, Resultsig, clk, rst, MEMRsigEx, JumpsigEx, Addressbuffet, OpCodesig, RDsig, RTsig, RSsig, Immsig);
+	MemDataIn <= EXT(Addressbuffet, 32) WHEN intr = '1'
+		ELSE
+		RSvalbuf2;
+	MEMW <= '1' WHEN intr = '1' AND clk = '1'
+		ELSE
+		MEMWsigEx;
+	Ins <= intrinssig WHEN intr = '1'
+		ELSE
+		MemDataOut;
+	mem : Memory PORT MAP(clk, MEMW, MEMRsigEx, Addresssig, MemDataIn, MemDataOut);
+	fet : Fetch PORT MAP(clk, rstsig, intr, Ins, Resultsig, MEMRsigEx, JumpsigEx, Addressbuffet, OpCodesig, RDsig, RTsig, RSsig, Immsig);
 	reg : RegFile PORT MAP(RTsig, RSsig, RDsigbufend, DataINbuf, RegWritesigend, clk, RTval, RSval);
-	dec : Decode PORT MAP(clk, OpCodesig, RDsig, RTsig, RSsig, RTval, RSval, Immsig, RDsigbuf, RSvalbuf, RTsigbuf, RSsigbuf, Op1sig, Op2sig, RegWritesig, Modesig, ALUEnablesig, Immediatesig, Jumpsig, IncSPsig, DecSPsig, PortWritesig, PortReadsig, MEMWsig, MEMRsig, SETCsig, Checksig);
+	dec : Decode PORT MAP(clk, rstsig, intr, OpCodesig, RDsig, RTsig, RSsig, RTval, RSval, Immsig, RDsigbuf, RSvalbuf, RTsigbuf, RSsigbuf, Op1sig, Op2sig, RegWritesig, Modesig, ALUEnablesig, Immediatesig, Jumpsig, IncSPsig, DecSPsig, PortWritesig, PortReadsig, MEMWsig, MEMRsig, SETCsig, Checksig);
 	fwd : FWDU PORT MAP(RTsigbuf, RSsigbuf, Op1sig, Op2sig, RDsigbuf2, RDsigbufend, RegWritesigEx, RegWritesigend, Immediatesig, Resultsig, DataINbuf, Op1sigfwd, Op2sigfwd);
-	ex : Execute PORT MAP(clk, RDsigbuf, RSvalbuf, Op1sigfwd, Op2sigfwd, RegWritesig, Modesig, ALUEnablesig, Immediatesig, Jumpsig, IncSPsig, DecSPsig, PortWritesig, PortReadsig, MEMWsig, MEMRsig, SETCsig, Checksig, RDsigbuf2, RSvalbuf2, RegWritesigEx, ImmediatesigEx, JumpsigEx, IncSPsigEx, DecSPsigEx, PortWritesigEx, PortReadsigEx, MEMWsigEx, MEMRsigEx, ChecksigEx, Resultsig, Carry, Zero, Negative);
-	memoryWB : MEMWB PORT MAP(clk, RegWritesigEx, PortWritesigEx, PortReadsigEx, MEMRsigEx, MemDataOut, IncSPsigEx, DecSPsigEx, Resultsig, RDsigbuf2, Addressbufmem, RegWritesigend, RDsigbufend, DataINbuf);
+	ex : Execute PORT MAP(clk, rstsig, intr, RDsigbuf, RSvalbuf, Op1sigfwd, Op2sigfwd, RegWritesig, Modesig, ALUEnablesig, Immediatesig, Jumpsig, IncSPsig, DecSPsig, PortWritesig, PortReadsig, MEMWsig, MEMRsig, SETCsig, Checksig, RDsigbuf2, RSvalbuf2, RegWritesigEx, ImmediatesigEx, JumpsigEx, IncSPsigEx, DecSPsigEx, PortWritesigEx, PortReadsigEx, MEMWsigEx, MEMRsigEx, ChecksigEx, Resultsig, Carry, Zero, Negative);
+	memoryWB : MEMWB PORT MAP(clk, rstsig, intr, RegWritesigEx, PortWritesigEx, PortReadsigEx, MEMRsigEx, MemDataOut, IncSPsigEx, DecSPsigEx, Resultsig, RDsigbuf2, Addressbufmem, RegWritesigend, RDsigbufend, DataINbuf);
 END CPUArch;

@@ -6,6 +6,8 @@ USE IEEE.numeric_std.ALL;
 ENTITY Decode IS
 	PORT (
 		clk : IN STD_LOGIC;
+		rst : IN STD_LOGIC;
+		intr : IN STD_LOGIC;
 		OpCode : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
 		RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 		RTAdd : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -67,9 +69,29 @@ ARCHITECTURE DecodeArch OF Decode IS
 	SIGNAL Chksig : STD_LOGIC_VECTOR(1 DOWNTO 0) := (OTHERS => '0');
 BEGIN
 	ctrl : CU PORT MAP(OpCode, RegWsig, Modesig, ALUEsig, Immsig, Jmpsig, IncSPsig, DecSPsig, PortWsig, PortRsig, MemWsig, MemRsig, SETCsig, Chksig);
-	PROCESS (clk)
+	PROCESS (clk, rst)
 	BEGIN
-		IF rising_edge(clk) THEN
+		IF rst = '1' THEN
+			RDbuf <= (OTHERS => '0');
+			Op1 <= (OTHERS => '0');
+			Op2 <= (OTHERS => '0');
+			RSbuf <= (OTHERS => '0');
+			RTAddbuf <= (OTHERS => '0');
+			RSAddbuf <= (OTHERS => '0');
+			RegWrite <= '0';
+			Mode <= (OTHERS => '0');
+			AluEnable <= '0';
+			Immediate <= '0';
+			Jump <= '0';
+			IncSP <= '0';
+			DecSP <= '0';
+			PortWrite <= '0';
+			PortRead <= '0';
+			MEMW <= '0';
+			MEMR <= '0';
+			SETC <= '0';
+			Checks <= (OTHERS => '0');
+		ELSIF rising_edge(clk) AND intr = '0' THEN
 			RDbuf <= RD;
 			Op1 <= RT;
 			IF (Immsig = '1') THEN
