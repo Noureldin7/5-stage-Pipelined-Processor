@@ -191,7 +191,7 @@ ARCHITECTURE CPUArch OF CPU IS
 			Carry : OUT STD_LOGIC;
 			Zero : OUT STD_LOGIC;
 			Negative : OUT STD_LOGIC;
-			Unbuffered_Result : STD_LOGIC_VECTOR(31 DOWNTO 0)
+			Unbuffered_Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 		);
 	END COMPONENT;
 	COMPONENT MEMWB IS
@@ -302,7 +302,7 @@ BEGIN
 		MemDataOut(31 DOWNTO 16) & "0000000000000000" & MemDataOut(15 DOWNTO 0);
 
 	hdunit : HDU PORT MAP(
-		OpCodesig, RDsig, RTsig, RSsig, Immsig, RDsigbuf, RTsigbuf, RSsigbuf, MEMRsig, MEMRsigEx, MEMWsigEx, RTval, RSval, Ins,
+		OpCodesig, RDsig, RTsig, RSsig, Immsig, RDsigbuf, RTsigbuf, RSsigbuf, MEMRsig, MEMRsigEx, MEMWsigEx, Op1sigfwd, Op2sigfwd, Ins,
 		HDU_Ins_Out, HDU_w_DE_OpCode, HDU_w_DE_RD, HDU_w_DE_RT, HDU_w_DE_RS, HDU_w_DE_Imm, HDU_EN, HDU_Swap_Hazard, HDU_Load_Use, HDU_HLT);
 
 	mem : Memory PORT MAP(clk, MEMW, MEMRsigEx, Addresssig, MemDataIn, MemDataOut);
