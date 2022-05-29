@@ -15,6 +15,7 @@ ENTITY HDU IS
         r_DE_RS : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         r_DE_MEMR : IN STD_LOGIC;
 
+        r_EM_RD :  IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         r_EM_MEMR : IN STD_LOGIC;
         r_EM_MEMW : IN STD_LOGIC;
 
@@ -43,7 +44,7 @@ ARCHITECTURE HDU_ARCH OF HDU IS
     SIGNAL HLT_Signal : STD_LOGIC;
 BEGIN
 
-    Load_Use_Signal <= '1' WHEN r_DE_MEMR = '1' AND (r_DE_RD = r_FD_RS OR r_DE_RD = r_FD_RT) ELSE
+    Load_Use_Signal <= '1' WHEN (r_DE_MEMR = '1' AND (r_DE_RD = r_FD_RS OR r_DE_RD = r_FD_RT)) or (r_EM_MEMR = '1' AND (r_EM_RD = r_FD_RS OR r_EM_RD = r_FD_RT)) ELSE
         '0';
     Swap_Hazard_Signal <= '1' WHEN r_FD_OpCode = "0001100" ELSE
         '0';
@@ -59,7 +60,7 @@ BEGIN
         IF (HLT_Signal = '1' OR r_EM_MEMR = '1' OR r_EM_MEMW = '1') THEN
             EN <= '0';
             IF (Load_Use_Signal = '1') THEN
-                Ins_Out <= (OTHERS => '0');
+                Ins_Out <= r_FD_OpCode & r_FD_RD & r_FD_RT & r_FD_RS & r_FD_Imm;
                 w_DE_OpCode <= (OTHERS => '0');
                 w_DE_RD <= (OTHERS => '0');
                 w_DE_RT <= (OTHERS => '0');

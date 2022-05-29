@@ -21,9 +21,9 @@ END ENTITY FWDU;
 
 ARCHITECTURE FWDUArch OF FWDU IS
 BEGIN
-	Op1 <= ALUBuff WHEN RegWALU = '1'AND DstALU = SrcAdd1
+	Op1 <= ALUBuff WHEN RegWALU = '1'AND DstALU = SrcAdd1 AND Imm = '0'
 		ELSE
-		MemBuff WHEN RegWMEM = '1'AND DstMEM = SrcAdd1
+		MemBuff WHEN RegWMEM = '1'AND DstMEM = SrcAdd1 AND Imm = '0'
 		ELSE
 		OrgOp1;
 	Op2 <= ALUBuff WHEN RegWALU = '1'AND DstALU = SrcAdd2 AND Imm = '0'
