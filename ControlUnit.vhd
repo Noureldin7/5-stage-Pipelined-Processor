@@ -34,7 +34,9 @@ BEGIN
 	IncSP <= OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
 		ELSE
 		'0';
-	DecSP <= NOT OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
+	DecSP <= NOT OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01") 
+		ELSE 
+		'1' WHEN OpCode = "1100010"
 		ELSE
 		'0';
 	Checks <= OpCode(1 DOWNTO 0) WHEN (jmp AND (OpCode(5) XNOR OpCode(2))) = '1'

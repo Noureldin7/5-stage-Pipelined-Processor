@@ -1,9 +1,10 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
-USE IEEE.numeric_std.ALL;
+USE IEEE.std_logic_unsigned.ALL;
 
 ENTITY HDU IS
     PORT (
+        PC : IN STD_LOGIC_VECTOR(19 DOWNTO 0);
         r_FD_OpCode : IN STD_LOGIC_VECTOR(6 DOWNTO 0); --values from fetch decode buffer
         r_FD_RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         r_FD_RT : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
@@ -45,20 +46,26 @@ ARCHITECTURE HDU_ARCH OF HDU IS
     SIGNAL Load_Use_Signal : STD_LOGIC;
     SIGNAL Swap_Hazard_Signal : STD_LOGIC;
     SIGNAL HLT_Signal : STD_LOGIC;
+    SIGNAL INT_Signal : STD_LOGIC;
+    SIGNAL Call_Signal : STD_LOGIC;
 BEGIN
 
-    Load_Use_Signal <= '1' WHEN ((r_DE_MEMR = '1' or r_DE_IOR = '1') AND (r_DE_RD = r_FD_RS OR r_DE_RD = r_FD_RT)) ELSE
+    Load_Use_Signal <= '1' WHEN ((r_DE_MEMR = '1' OR r_DE_IOR = '1') AND (r_DE_RD = r_FD_RS OR r_DE_RD = r_FD_RT)) ELSE
         '0';
     Swap_Hazard_Signal <= '1' WHEN r_FD_OpCode = "0001100" ELSE
         '0';
     HLT_Signal <= '1' WHEN Ins_In(47 DOWNTO 41) = "0000001" ELSE
+        '0';
+    INT_Signal <= '1' WHEN r_FD_OpCode = "1110001" ELSE
+        '0';
+    Call_Signal <= '1' WHEN r_FD_OpCode = "1010100" ELSE
         '0';
 
     Load_Use <= Load_Use_Signal;
     Swap_Hazard <= Swap_Hazard_Signal;
     HLT <= HLT_Signal;
 
-    PROCESS (HLT_Signal, r_EM_MEMR, r_EM_MEMW, r_FD_OpCode, r_FD_RD, r_FD_RT, r_FD_RS, r_FD_Imm, Ins_In, Load_Use_Signal, Swap_Hazard_Signal, Imm_1, Imm_2, r_DE_MEMR, JMP)
+    PROCESS (HLT_Signal, r_EM_MEMR, r_EM_MEMW, r_FD_OpCode, r_FD_RD, r_FD_RT, r_FD_RS, r_FD_Imm, Ins_In, Load_Use_Signal, Swap_Hazard_Signal, Imm_1, Imm_2, r_DE_MEMR, JMP, Call_Signal, PC)
     BEGIN
         IF (JMP = '1') THEN
             EN <= '1';
@@ -68,6 +75,17 @@ BEGIN
             w_DE_RT <= (OTHERS => '0');
             w_DE_RS <= (OTHERS => '0');
             w_DE_Imm <= (OTHERS => '0');
+        ELSIF (Call_Signal = '1') THEN
+            EN <= '0';
+            Ins_Out <= "1010011" &
+                "000000000" &
+                r_FD_Imm;
+
+            w_DE_OpCode <= "1100010";
+            w_DE_RD <= (OTHERS => '0');
+            w_DE_RT <= (OTHERS => '0');
+            w_DE_RS <= (OTHERS => '0');
+            w_DE_Imm <= ("000000000000" & PC) + 1;
         ELSIF (HLT_Signal = '1' OR r_EM_MEMR = '1' OR r_EM_MEMW = '1') THEN
             EN <= '0';
             IF (Load_Use_Signal = '1') THEN
@@ -95,7 +113,6 @@ BEGIN
                 w_DE_RS <= r_FD_RS;
                 w_DE_Imm <= r_FD_Imm;
             END IF;
-
         ELSIF (Load_Use_Signal = '1') THEN
             EN <= '0';
 

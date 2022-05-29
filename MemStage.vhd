@@ -20,7 +20,8 @@ ENTITY MEMWB IS
 		RegWritebuf : OUT STD_LOGIC;
 		RDbuf : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		DataOut : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		Unbuffered_DataOut : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+		Unbuffered_DataOut : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		ay7aga : OUT STD_LOGIC
 	);
 END ENTITY MEMWB;
 
@@ -31,13 +32,17 @@ ARCHITECTURE MEMWBArch OF MEMWB IS
 	SIGNAL StackPtr : unsigned(31 DOWNTO 0) := (OTHERS => '1');
 	SIGNAL Unbuffered_DataOut_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
+	ay7aga <= '1' WHEN rst = '0' AND MemRead = '0' AND PortRead = '0'
+		ELSE
+		'0';
+
 	Unbuffered_DataOut_Signal <= (OTHERS => '0') WHEN rst = '1' ELSE
 		MemData WHEN MemRead = '1' ELSE
 		STD_LOGIC_VECTOR(InPort(0)) WHEN PortRead = '1' ELSE
 		Result;
 
 	Unbuffered_DataOut <= Unbuffered_DataOut_Signal;
-	
+
 	PROCESS (clk, rst)
 	BEGIN
 		IF rst = '1' THEN
