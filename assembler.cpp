@@ -191,7 +191,7 @@ string To_OPcode(string command, string *Operands, string &Imm)
 		Operands[1] = "";
 		Operands[2] = "";
 		Imm = HexToBin("1");
-		return "0001000";
+		return "1001000";
 	}
 	else if (command == "DEC")
 	{
@@ -244,8 +244,8 @@ string To_OPcode(string command, string *Operands, string &Imm)
 	else if (command == "SUB")
 	{
 		Operands[0] = "D";
-		Operands[1] = "S";
-		Operands[2] = "T";
+		Operands[1] = "T";
+		Operands[2] = "S";
 		Imm = "";
 		return "0001101";
 	}
@@ -260,14 +260,14 @@ string To_OPcode(string command, string *Operands, string &Imm)
 	else if (command == "IADD")
 	{
 		Operands[0] = "D";
-		Operands[1] = "S";
+		Operands[1] = "T";
 		Operands[2] = "I";
 		Imm = "";
 		return "1001001";
 	}
 	else if (command == "PUSH")
 	{
-		Operands[0] = "D";
+		Operands[0] = "S";
 		Operands[1] = "";
 		Operands[2] = "";
 		Imm = "";
@@ -487,7 +487,7 @@ int readIns(ifstream &inputFile, string *words, MemEntry &output)
 					immediate = HexToBin(words[i + 1]);
 				else if (operands[i][j] == 'O')
 				{
-					immediate = HexToBin(words[i + 1].substr(0, words[i + 1].find('(') - 1));
+					immediate = HexToBin(words[i + 1].substr(0, words[i + 1].find('(')));
 					Rt = Get_Regitser_Index(words[i + 1].substr(words[i + 1].find('(') + 1, words[i + 1].find(')') - words[i + 1].find('(') - 1));
 					if (words[i + 1].find(')') == words[i + 1].length() - 2)
 					{
@@ -738,18 +738,12 @@ int main(int argc, char *argv[])
 	}
 	outputFile << "force -freeze sim:/cpu/clk 1 0, 0 {50 ps} -r 100\n"
 			   << "force -freeze sim:/cpu/intr 0 0\n"
+			   << "force -freeze sim:/cpu/rst 0 0\n"
+			   << "run\n"
 			   << "force -freeze sim:/cpu/rst 1 0\n"
 			   << "run\n"
 			   << "force -freeze sim:/cpu/rst 0 0\n"
-			   << "run 400\n"
-			   << "run\n"
-			   << "run\n"
-			   << "run\n"
-			   << "run\n"
-			   << "run\n"
-			   << "run\n"
-			   << "run\n"
-			   << "run" << endl;
+			   << "run 300" << endl;
 	outputFile.close();
 	return 0;
 }
