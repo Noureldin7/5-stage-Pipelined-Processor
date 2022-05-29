@@ -312,7 +312,7 @@ BEGIN
 	fet : Fetch PORT MAP(clk, rstsig, intr, HDU_Ins_Out, Resultsig, HDU_EN, JumpsigEx, Addressbuffet, OpCodesig, RDsig, RTsig, RSsig, Immsig);
 	reg : RegFile PORT MAP(RTsig, RSsig, RDsigbufend, DataINbuf, RegWritesigend, clk, RTval, RSval);
 	dec : Decode PORT MAP(clk, rstsig, intr, HDU_w_DE_OpCode, HDU_w_DE_RD, HDU_w_DE_RT, HDU_w_DE_RS, Op1sigfwd, Op2sigfwd, HDU_w_DE_Imm, RDsigbuf, RSvalbuf, RTsigbuf, RSsigbuf, Op1sig, Op2sig, RegWritesig, Modesig, ALUEnablesig, Immediatesig, Jumpsig, IncSPsig, DecSPsig, PortWritesig, PortReadsig, MEMWsig, MEMRsig, SETCsig, Checksig, D_IMD);
-	fwd : FWDU PORT MAP(RTsig, RSsig, RTval, RSval, RDsigbuf, RDsigbuf2, RegWritesig, RegWritesigEx, D_IMD, ALU_Result, Resultsig, Op1sigfwd, Op2sigfwd);
+	fwd : FWDU PORT MAP(RTsig, RSsig, RTval, RSval, RDsigbuf, RDsigbuf2, RegWritesig, RegWritesigEx, D_IMD, MEMRsigEx, ALU_Result, Resultsig, Op1sigfwd, Op2sigfwd);
 	ex : Execute PORT MAP(clk, rstsig, intr, RDsigbuf, RSvalbuf, Op1sig, Op2sig, RegWritesig, Modesig, ALUEnablesig, Immediatesig, Jumpsig, IncSPsig, DecSPsig, PortWritesig, PortReadsig, MEMWsig, MEMRsig, SETCsig, Checksig, RDsigbuf2, RSvalbuf2, RegWritesigEx, ImmediatesigEx, JumpsigEx, IncSPsigEx, DecSPsigEx, PortWritesigEx, PortReadsigEx, MEMWsigEx, MEMRsigEx, ChecksigEx, Resultsig, Carry, Zero, Negative, ALU_Result);
 	memoryWB : MEMWB PORT MAP(clk, rstsig, intr, RegWritesigEx, PortWritesigEx, PortReadsigEx, MEMRsigEx, MemDataOut, IncSPsigEx, DecSPsigEx, Resultsig, RDsigbuf2, Addressbufmem, RegWritesigend, RDsigbufend, DataINbuf);
 END CPUArch;
