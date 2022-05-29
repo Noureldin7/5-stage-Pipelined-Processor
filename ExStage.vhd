@@ -28,7 +28,7 @@ ENTITY Execute IS
 		RSbuf : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		RegWritebuf : OUT STD_LOGIC;
 		Immediatebuf : OUT STD_LOGIC;
-		Jumpbuf : OUT STD_LOGIC;
+		Jumpbuf : INOUT STD_LOGIC;
 		IncSPbuf : OUT STD_LOGIC;
 		DecSPbuf : OUT STD_LOGIC;
 		PortWritebuf : OUT STD_LOGIC;
@@ -41,7 +41,7 @@ ENTITY Execute IS
 		Zero : OUT STD_LOGIC;
 		Negative : OUT STD_LOGIC;
 		Unbuffered_Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
-		);
+	);
 END ENTITY Execute;
 
 ARCHITECTURE ExArch OF Execute IS
@@ -58,7 +58,8 @@ ARCHITECTURE ExArch OF Execute IS
 			Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 			Carry : OUT STD_LOGIC;
 			Zero : OUT STD_LOGIC;
-			Negative : OUT STD_LOGIC);
+			Negative : OUT STD_LOGIC
+		);
 	END COMPONENT;
 BEGIN
 	Unbuffered_Result <= Resultsig;
@@ -72,47 +73,20 @@ BEGIN
 	Carry <= '0' WHEN Checks = ("10")
 		ELSE
 		ALUC;
+
+	ZeroSig <= ALUZ WHEN ALUEnable = '1' ELSE
+		'0' WHEN Jumpbuf = '1' AND Checks = ("00");
+
+	Negativesig <= ALUN WHEN AlUEnable = '1' ELSE
+		'0' WHEN Jumpbuf = '1' AND Checks = ("01");
+
+	Carrysig <= ALUC WHEN AlUEnable = '1' AND (Mode = "00" OR Mode = "01") ELSE
+		'1' WHEN SETC = '1' ELSE
+		'0' WHEN Jumpbuf = '1' AND Checks = ("10");
+
 	PROCESS (clk, rst)
 	BEGIN
-		IF falling_edge(clk) AND intr = '0' THEN
-			IF (MemWrite OR MEMRead) = '0' AND (ALUEnable = '1' OR Checks /= ("11")) THEN
-				IF Checks = ("00") THEN
-					Jumpbuf <= Jump AND Zerosig;
-					Zerosig <= '0';
-					Negativesig <= ALUN;
-					Carrysig <= ALUC;
-				ELSIF Checks = ("01") THEN
-					Jumpbuf <= Jump AND Negativesig;
-					Zerosig <= ALUZ;
-					Negativesig <= '0';
-					Carrysig <= ALUC;
-				ELSIF Checks = ("10") THEN
-					Jumpbuf <= Jump AND Carrysig;
-					Zerosig <= ALUZ;
-					Negativesig <= ALUN;
-					Carrysig <= '0';
-				ELSE
-					Jumpbuf <= Jump;
-					Zerosig <= ALUZ;
-					Negativesig <= ALUN;
-					Carrysig <= ALUC;
-				END IF;
-			END IF;
-		END IF;
-		IF rising_edge(clk) AND intr = '0' THEN
-			RDbuf <= RD;
-			RSbuf <= RS;
-			RegWritebuf <= RegWrite;
-			Immediatebuf <= Immediate;
-			IncSPbuf <= IncSP;
-			DecSPbuf <= DecSP;
-			PortWritebuf <= PortWrite;
-			PortReadbuf <= PortRead;
-			MEMWbuf <= MemWrite;
-			MEMRbuf <= MemRead;
-			Checksbuf <= Checks;
-			Result <= Resultsig;
-		ELSIF rst = '1' THEN
+		IF rst = '1' THEN
 			RDbuf <= (OTHERS => '0');
 			RSbuf <= (OTHERS => '0');
 			RegWritebuf <= '0';
@@ -126,9 +100,29 @@ BEGIN
 			Jumpbuf <= '0';
 			Checksbuf <= (OTHERS => '0');
 			Result <= (OTHERS => '0');
-			Zerosig <= '0';
-			Negativesig <= '0';
-			Carrysig <= '0';
+		ELSIF rising_edge(clk) AND intr = '0' THEN
+			IF Checks = ("00") THEN
+				Jumpbuf <= Jump AND Zerosig;
+			ELSIF Checks = ("01") THEN
+				Jumpbuf <= Jump AND Negativesig;
+			ELSIF Checks = ("10") THEN
+				Jumpbuf <= Jump AND Carrysig;
+			ELSE
+				Jumpbuf <= Jump;
+			END IF;
+			RDbuf <= RD;
+			RSbuf <= RS;
+			RegWritebuf <= RegWrite;
+			Immediatebuf <= Immediate;
+			IncSPbuf <= IncSP;
+			DecSPbuf <= DecSP;
+			PortWritebuf <= PortWrite;
+			PortReadbuf <= PortRead;
+			MEMWbuf <= MemWrite;
+			MEMRbuf <= MemRead;
+			Checksbuf <= Checks;
+			Result <= Resultsig;
+
 		END IF;
 	END PROCESS;
 END ExArch;

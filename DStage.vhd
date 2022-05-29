@@ -99,7 +99,7 @@ BEGIN
 			RDbuf <= RD;
 			Op1 <= RT;
 			IF (Immsig = '1') THEN
-				Op2 <= EXT(Imm, 32);
+				Op2 <= Imm;
 			ELSE
 				Op2 <= RS;
 			END IF;
