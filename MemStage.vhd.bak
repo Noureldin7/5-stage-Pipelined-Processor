@@ -29,7 +29,7 @@ ARCHITECTURE MEMWBArch OF MEMWB IS
 	SIGNAL InPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL OutPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL StackPtr : unsigned(31 DOWNTO 0) := (OTHERS => '1');
-	SIGNAL Unbuffered_DataOut_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL Unbuffered_DataOut_Signal : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
 	Unbuffered_DataOut_Signal <= (OTHERS => '0') WHEN rst = '1' ELSE
 		MemData WHEN MemRead = '1' ELSE

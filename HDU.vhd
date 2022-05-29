@@ -15,9 +15,11 @@ ENTITY HDU IS
         r_DE_RS : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         r_DE_MEMR : IN STD_LOGIC;
 
-        r_EM_RD :  IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+        r_EM_RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
         r_EM_MEMR : IN STD_LOGIC;
         r_EM_MEMW : IN STD_LOGIC;
+
+        JMP : IN STD_LOGIC;
 
         Imm_1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0); --forwarded val
         Imm_2 : IN STD_LOGIC_VECTOR(31 DOWNTO 0); --forwarded val
@@ -57,7 +59,15 @@ BEGIN
 
     PROCESS (HLT_Signal, r_EM_MEMR, r_EM_MEMW, r_FD_OpCode, r_FD_RD, r_FD_RT, r_FD_RS, r_FD_Imm, Ins_In, Load_Use_Signal, Swap_Hazard_Signal, Imm_1, Imm_2, r_DE_MEMR)
     BEGIN
-        IF (HLT_Signal = '1' OR r_EM_MEMR = '1' OR r_EM_MEMW = '1') THEN
+        IF (JMP = '1') THEN
+            EN <= '1';
+            Ins_Out <= Ins_In;
+            w_DE_OpCode <= (OTHERS => '0');
+            w_DE_RD <= (OTHERS => '0');
+            w_DE_RT <= (OTHERS => '0');
+            w_DE_RS <= (OTHERS => '0');
+            w_DE_Imm <= (OTHERS => '0');
+        ELSIF (HLT_Signal = '1' OR r_EM_MEMR = '1' OR r_EM_MEMW = '1') THEN
             EN <= '0';
             IF (Load_Use_Signal = '1') THEN
                 Ins_Out <= r_FD_OpCode & r_FD_RD & r_FD_RT & r_FD_RS & r_FD_Imm;
@@ -121,6 +131,7 @@ BEGIN
             w_DE_Imm <= r_FD_Imm;
 
         END IF;
+
     END PROCESS;
 
 END ARCHITECTURE;
