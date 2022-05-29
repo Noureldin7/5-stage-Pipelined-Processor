@@ -1,0 +1,1 @@
+.\assembler.exe "Test Cases\TwoOperand.asm" "memory.txt"

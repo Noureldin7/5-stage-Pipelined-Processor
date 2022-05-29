@@ -2,6 +2,8 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include <iterator>
+#include <map>
 using namespace std;
 
 struct MemEntry
@@ -144,21 +146,11 @@ string HexToBin(string hexdec)
 	}
 }
 
-// Operands[0] = Kol el 7aga elly bytktb feeha op1
-// Operands[1] = Kol el 7aga elly bytktb feeha op2
-// Operands[2] = Kol el 7aga elly bytktb feeha op3
+// Operands[0]
+// Operands[1]
+// Operands[2]
 // Imm
 // D, T, S, I, O
-// NOT
-// Operands[0] = "DT";
-// Operands[1] = "";
-// Operands[2] = "";
-// Imm = ""
-// INC
-// Operands[0] = "DT";
-// Operands[1] = "";
-// Operands[2] = "";
-// Imm = "0000000000000001";
 string To_OPcode(string command, string *Operands, string &Imm)
 {
 	if (command == "NOP")
@@ -402,7 +394,7 @@ int readLine(ifstream &inputFile, string *words)
 		line.erase(0, 1);
 		if (nextChar == '#')
 			break;
-		if (counter != 0 && (nextChar == ' '  || nextChar == '\t'))
+		if (counter != 0 && (nextChar == ' ' || nextChar == '\t'))
 		{
 			nextChar = line.front();
 			while (!line.empty())
@@ -602,7 +594,8 @@ int writeInMem(ifstream &inputFile, MemEntry &output, int &currentAddress, int &
 
 int main(int argc, char *argv[])
 {
-	if (argc != 2)
+	map<int, string> Memory;
+	if (argc != 3)
 	{
 		cout << "Invalid Inputs" << endl;
 		return 0;
@@ -610,7 +603,7 @@ int main(int argc, char *argv[])
 	ifstream inputFile(argv[1]);
 	if (!inputFile)
 	{
-		cout << "Invalid File" << endl;
+		cout << "Invalid Input File" << endl;
 		return 0;
 	}
 	int currentAddress = 0x1000;
@@ -621,21 +614,48 @@ int main(int argc, char *argv[])
 		currentAddress = output.index;
 		int state = writeInMem(inputFile, output, currentAddress, lineNum);
 		if (state == 1)
+		{
+			Memory.insert(pair<int, string>(output.index, output.value));
 			cout << "At Index: " << output.index << ", Instruction: " << output.value << endl;
+		}
 		else if (state == -1)
 		{
 			cout << "Error at line " << lineNum << endl;
+			inputFile.close();
 			return 0;
 		}
-		// string words[4];
-		// int state = readLine(inputFile, words);
-		// if (state == 1){
-		// 	cout << words[0]+" "+words[1]+" "+words[2]+" "+words[3] << endl;
-		// }
-		// else if (state == -1){
-		// 	cout << "Error" << endl;
-		// 	return 0;
-		// }
 	}
+	inputFile.close();
+	ofstream outputFile;
+	outputFile.open(argv[2]);
+	if (!outputFile)
+	{
+		cout << "Invalid Output File" << endl;
+		outputFile.close();
+		return 0;
+	}
+	map<int, string>::iterator itr = Memory.begin();
+	for (int i = 0; i < 1024 * 1024; ++i)
+	{
+		if (i != 0) outputFile<<endl;
+		if (itr->first == i)
+		{
+			outputFile << itr->second;
+			if (itr != Memory.end())
+			{
+				map<int, string>::iterator itrNext = itr;
+				++itrNext;
+				if (itrNext->first == itr->first)
+				{
+					cout << "Error, Two instructions in same address" << endl;
+					outputFile.close();
+					return 0;
+				}
+				itr = itrNext;
+			}
+		}
+		else outputFile << "00000000000000000000000000000000";
+	}
+	outputFile.close();
 	return 0;
 }
