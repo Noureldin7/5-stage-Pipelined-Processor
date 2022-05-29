@@ -1,4 +1,5 @@
-*.mpf 
-*.cr.mti
+.vscode
 *.bak
+*.mpf
+*.cr.mtl
 work

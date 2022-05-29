@@ -5,6 +5,8 @@ USE IEEE.numeric_std.ALL;
 ENTITY Execute IS
 	PORT (
 		clk : IN STD_LOGIC;
+		rst : IN STD_LOGIC;
+		intr : IN STD_LOGIC;
 		RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 		RS : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		Op1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -67,9 +69,9 @@ BEGIN
 	Carry <= '0' WHEN Checks = ("10")
 		ELSE
 		ALUC;
-	PROCESS (clk)
+	PROCESS (clk, rst)
 	BEGIN
-		IF falling_edge(clk) THEN
+		IF falling_edge(clk) AND intr = '0' THEN
 			IF (MemWrite OR MEMRead) = '0' AND (ALUEnable = '1' OR Checks /= ("11")) THEN
 				IF Checks = ("00") THEN
 					Jumpbuf <= Jump AND Zerosig;
@@ -94,7 +96,7 @@ BEGIN
 				END IF;
 			END IF;
 		END IF;
-		IF rising_edge(clk) THEN
+		IF rising_edge(clk) AND intr = '0' THEN
 			RDbuf <= RD;
 			RSbuf <= RS;
 			RegWritebuf <= RegWrite;
@@ -107,6 +109,23 @@ BEGIN
 			MEMRbuf <= MemRead;
 			Checksbuf <= Checks;
 			Result <= Resultsig;
+		ELSIF rst = '1' THEN
+			RDbuf <= (OTHERS => '0');
+			RSbuf <= (OTHERS => '0');
+			RegWritebuf <= '0';
+			Immediatebuf <= '0';
+			IncSPbuf <= '0';
+			DecSPbuf <= '0';
+			PortWritebuf <= '0';
+			PortReadbuf <= '0';
+			MEMWbuf <= '0';
+			MEMRbuf <= '0';
+			Jumpbuf <= '0';
+			Checksbuf <= (OTHERS => '0');
+			Result <= (OTHERS => '0');
+			Zerosig <= '0';
+			Negativesig <= '0';
+			Carrysig <= '0';
 		END IF;
 	END PROCESS;
 END ExArch;

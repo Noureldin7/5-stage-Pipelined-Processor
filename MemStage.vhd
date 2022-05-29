@@ -5,6 +5,8 @@ USE IEEE.numeric_std.ALL;
 ENTITY MEMWB IS
 	PORT (
 		clk : IN STD_LOGIC;
+		rst : IN STD_LOGIC;
+		intr : IN STD_LOGIC;
 		RegWrite : IN STD_LOGIC;
 		PortWrite : IN STD_LOGIC;
 		PortRead : IN STD_LOGIC;
@@ -26,22 +28,28 @@ ARCHITECTURE MEMWBArch OF MEMWB IS
 	SIGNAL OutPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL StackPtr : unsigned(31 DOWNTO 0) := (OTHERS => '1');
 BEGIN
-	PROCESS (clk)
+	PROCESS (clk, rst)
 	BEGIN
-		IF rising_edge(clk) THEN
-			IF MemRead = '1' THEN
-				DataOut <= MemData;
-			ELSIF PortRead = '1' THEN
-				DataOut <= STD_LOGIC_VECTOR(InPort(0));
-			ELSE
-				DataOut <= Result;
-			END IF;
-			IF DecSP = '1' THEN
+		IF rst = '1' THEN
+			RegWritebuf <= '0';
+			RDbuf <= (OTHERS => '0');
+			DataOut <= (OTHERS => '0');
+		ELSIF rising_edge(clk) THEN
+			IF DecSP = '1' OR intr = '1' THEN
 				StackPtr <= StackPtr - 1;
+			END IF;
+			IF intr = '0' THEN
+				IF MemRead = '1' THEN
+					DataOut <= MemData;
+				ELSIF PortRead = '1' THEN
+					DataOut <= STD_LOGIC_VECTOR(InPort(0));
+				ELSE
+					DataOut <= Result;
+				END IF;
 			END IF;
 			RegWritebuf <= RegWrite;
 			RDbuf <= RD;
-		ELSIF falling_edge(clk) THEN
+		ELSIF falling_edge(clk) AND intr = '0' THEN
 			IF IncSP = '1' THEN
 				StackPtr <= StackPtr + 1;
 			END IF;
@@ -50,7 +58,7 @@ BEGIN
 			END IF;
 		END IF;
 	END PROCESS;
-	AddressOut <= STD_LOGIC_VECTOR(StackPtr(19 DOWNTO 0)) WHEN (IncSP OR DecSP) = '1'
+	AddressOut <= STD_LOGIC_VECTOR(StackPtr(19 DOWNTO 0)) WHEN (IncSP OR intr OR DecSP) = '1'
 		ELSE
 		Result(19 DOWNTO 0);
 END MEMWBArch;

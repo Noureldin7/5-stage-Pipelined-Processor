@@ -27,7 +27,7 @@ ARCHITECTURE RegFileArch OF RegFile IS
 BEGIN
 	PROCESS (clk)
 	BEGIN
-		IF rising_edge(clk) THEN
+		IF falling_edge(clk) THEN
 			IF RegWrite = '1' THEN
 				DataOut(to_integer(unsigned(WAdd))) <= DataIN;
 			END IF;
