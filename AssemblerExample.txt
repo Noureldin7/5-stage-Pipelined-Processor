@@ -1,1 +1,1 @@
-.\assembler.exe "Test Cases\TwoOperand.asm" "memory.txt"
+.\assembler.exe "Test Cases\Branch.asm" "macro.txt"

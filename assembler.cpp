@@ -634,28 +634,122 @@ int main(int argc, char *argv[])
 		outputFile.close();
 		return 0;
 	}
+	outputFile << "vsim -gui work.cpu\n"
+			   << "add wave -position insertpoint  \\\n"
+			   << "sim:/cpu/Addressbuffet \\\n"
+			   << "sim:/cpu/Addressbufmem \\\n"
+			   << "sim:/cpu/Addresssig \\\n"
+			   << "sim:/cpu/ALU_Result \\\n"
+			   << "sim:/cpu/ALUEnablesig \\\n"
+			   << "sim:/cpu/Carry \\\n"
+			   << "sim:/cpu/Checksig \\\n"
+			   << "sim:/cpu/ChecksigEx \\\n"
+			   << "sim:/cpu/clk \\\n"
+			   << "sim:/cpu/D_IMD \\\n"
+			   << "sim:/cpu/DataINbuf \\\n"
+			   << "sim:/cpu/Decode_Flush \\\n"
+			   << "sim:/cpu/DecSPsig \\\n"
+			   << "sim:/cpu/DecSPsigEx \\\n"
+			   << "sim:/cpu/Enable \\\n"
+			   << "sim:/cpu/ex_flush \\\n"
+			   << "sim:/cpu/Execute_Flush \\\n"
+			   << "sim:/cpu/Fetch_Jump \\\n"
+			   << "sim:/cpu/HDU_EN \\\n"
+			   << "sim:/cpu/HDU_HLT \\\n"
+			   << "sim:/cpu/HDU_Ins_Out \\\n"
+			   << "sim:/cpu/HDU_Load_Use \\\n"
+			   << "sim:/cpu/HDU_Swap_Hazard \\\n"
+			   << "sim:/cpu/HDU_w_DE_Imm \\\n"
+			   << "sim:/cpu/HDU_w_DE_OpCode \\\n"
+			   << "sim:/cpu/HDU_w_DE_RD \\\n"
+			   << "sim:/cpu/HDU_w_DE_RS \\\n"
+			   << "sim:/cpu/HDU_w_DE_RT \\\n"
+			   << "sim:/cpu/Immediatesig \\\n"
+			   << "sim:/cpu/ImmediatesigEx \\\n"
+			   << "sim:/cpu/Immsig \\\n"
+			   << "sim:/cpu/ImmsigEx \\\n"
+			   << "sim:/cpu/IncSPsig \\\n"
+			   << "sim:/cpu/IncSPsigEx \\\n"
+			   << "sim:/cpu/Ins \\\n"
+			   << "sim:/cpu/intr \\\n"
+			   << "sim:/cpu/intrinssig \\\n"
+			   << "sim:/cpu/intrsig \\\n"
+			   << "sim:/cpu/Jump_Address \\\n"
+			   << "sim:/cpu/Jumpsig \\\n"
+			   << "sim:/cpu/JumpsigEx \\\n"
+			   << "sim:/cpu/MemDataIn \\\n"
+			   << "sim:/cpu/MemDataOut \\\n"
+			   << "sim:/cpu/MEMRsig \\\n"
+			   << "sim:/cpu/MEMRsigEx \\\n"
+			   << "sim:/cpu/Memsig \\\n"
+			   << "sim:/cpu/MEMW \\\n"
+			   << "sim:/cpu/MEMWsig \\\n"
+			   << "sim:/cpu/MEMWsigEx \\\n"
+			   << "sim:/cpu/Modesig \\\n"
+			   << "sim:/cpu/Negative \\\n"
+			   << "sim:/cpu/Op1sig \\\n"
+			   << "sim:/cpu/Op1sigfwd \\\n"
+			   << "sim:/cpu/Op2sig \\\n"
+			   << "sim:/cpu/Op2sigfwd \\\n"
+			   << "sim:/cpu/OpCodesig \\\n"
+			   << "sim:/cpu/Original_Jump_EM \\\n"
+			   << "sim:/cpu/PortReadsig \\\n"
+			   << "sim:/cpu/PortReadsigEx \\\n"
+			   << "sim:/cpu/PortWritesig \\\n"
+			   << "sim:/cpu/PortWritesigEx \\\n"
+			   << "sim:/cpu/RDsig \\\n"
+			   << "sim:/cpu/RDsigbuf \\\n"
+			   << "sim:/cpu/RDsigbuf2 \\\n"
+			   << "sim:/cpu/RDsigbufend \\\n"
+			   << "sim:/cpu/RegWritesig \\\n"
+			   << "sim:/cpu/RegWritesigend \\\n"
+			   << "sim:/cpu/RegWritesigEx \\\n"
+			   << "sim:/cpu/Result \\\n"
+			   << "sim:/cpu/Resultsig \\\n"
+			   << "sim:/cpu/RET \\\n"
+			   << "sim:/cpu/RSsig \\\n"
+			   << "sim:/cpu/RSsigbuf \\\n"
+			   << "sim:/cpu/rst \\\n"
+			   << "sim:/cpu/rstsig \\\n"
+			   << "sim:/cpu/RSval \\\n"
+			   << "sim:/cpu/RSvalbuf \\\n"
+			   << "sim:/cpu/RSvalbuf2 \\\n"
+			   << "sim:/cpu/RTsig \\\n"
+			   << "sim:/cpu/RTsigbuf \\\n"
+			   << "sim:/cpu/RTval \\\n"
+			   << "sim:/cpu/SETCsig \\\n"
+			   << "sim:/cpu/Unbuffered_DataOut \\\n"
+			   << "sim:/cpu/Zero" << endl;
 	map<int, string>::iterator itr = Memory.begin();
-	for (int i = 0; i < 1024 * 1024; ++i)
+	for (itr; itr != Memory.end(); ++itr)
 	{
-		if (i != 0) outputFile<<endl;
-		if (itr->first == i)
+		outputFile << "mem load -filltype value -filldata 32\'b"
+				   << itr->second << " -fillradix binary /cpu/mem/Memory("
+				   << itr->first << ")" << endl;
+
+		map<int, string>::iterator itrNext = itr;
+		++itrNext;
+		if (itrNext->first == itr->first)
 		{
-			outputFile << itr->second;
-			if (itr != Memory.end())
-			{
-				map<int, string>::iterator itrNext = itr;
-				++itrNext;
-				if (itrNext->first == itr->first)
-				{
-					cout << "Error, Two instructions in same address" << endl;
-					outputFile.close();
-					return 0;
-				}
-				itr = itrNext;
-			}
+			cout << "Error, Two instructions in same address" << endl;
+			outputFile.close();
+			return 0;
 		}
-		else outputFile << "00000000000000000000000000000000";
 	}
+	outputFile << "force -freeze sim:/cpu/clk 1 0, 0 {50 ps} -r 100\n"
+			   << "force -freeze sim:/cpu/intr 0 0\n"
+			   << "force -freeze sim:/cpu/rst 1 0\n"
+			   << "run\n"
+			   << "force -freeze sim:/cpu/rst 0 0\n"
+			   << "run 400\n"
+			   << "run\n"
+			   << "run\n"
+			   << "run\n"
+			   << "run\n"
+			   << "run\n"
+			   << "run\n"
+			   << "run\n"
+			   << "run" << endl;
 	outputFile.close();
 	return 0;
 }
