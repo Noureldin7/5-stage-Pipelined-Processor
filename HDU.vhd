@@ -44,7 +44,7 @@ ARCHITECTURE HDU_ARCH OF HDU IS
     SIGNAL HLT_Signal : STD_LOGIC;
 BEGIN
 
-    Load_Use_Signal <= '1' WHEN (r_DE_MEMR = '1' AND (r_DE_RD = r_FD_RS OR r_DE_RD = r_FD_RT)) or (r_EM_MEMR = '1' AND (r_EM_RD = r_FD_RS OR r_EM_RD = r_FD_RT)) ELSE
+    Load_Use_Signal <= '1' WHEN (r_DE_MEMR = '1' AND (r_DE_RD = r_FD_RS OR r_DE_RD = r_FD_RT)) ELSE
         '0';
     Swap_Hazard_Signal <= '1' WHEN r_FD_OpCode = "0001100" ELSE
         '0';
