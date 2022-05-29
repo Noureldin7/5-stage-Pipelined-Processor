@@ -34,27 +34,29 @@ BEGIN
 			RegWritebuf <= '0';
 			RDbuf <= (OTHERS => '0');
 			DataOut <= (OTHERS => '0');
-		ELSIF rising_edge(clk) THEN
-			IF DecSP = '1' OR intr = '1' THEN
+		ELSIF rising_edge(clk) AND intr = '0' THEN
+			IF DecSP = '1' THEN
 				StackPtr <= StackPtr - 1;
 			END IF;
-			IF intr = '0' THEN
-				IF MemRead = '1' THEN
-					DataOut <= MemData;
-				ELSIF PortRead = '1' THEN
-					DataOut <= STD_LOGIC_VECTOR(InPort(0));
-				ELSE
-					DataOut <= Result;
-				END IF;
+			IF MemRead = '1' THEN
+				DataOut <= MemData;
+			ELSIF PortRead = '1' THEN
+				DataOut <= STD_LOGIC_VECTOR(InPort(0));
+			ELSE
+				DataOut <= Result;
 			END IF;
 			RegWritebuf <= RegWrite;
 			RDbuf <= RD;
-		ELSIF falling_edge(clk) AND intr = '0' THEN
-			IF IncSP = '1' THEN
-				StackPtr <= StackPtr + 1;
-			END IF;
-			IF PortWrite = '1' THEN
-				OutPort(0) <= unsigned(Result);
+		ELSIF falling_edge(clk) THEN
+			IF intr = '1' THEN
+				StackPtr <= StackPtr - 1;
+			ELSE
+				IF IncSP = '1' THEN
+					StackPtr <= StackPtr + 1;
+				END IF;
+				IF PortWrite = '1' THEN
+					OutPort(0) <= unsigned(Result);
+				END IF;
 			END IF;
 		END IF;
 	END PROCESS;

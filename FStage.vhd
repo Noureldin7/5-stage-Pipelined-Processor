@@ -67,7 +67,7 @@ BEGIN
 	END PROCESS;
 	PROCESS (clk)
 	BEGIN
-		IF falling_edge(clk) AND Mem /= '1' THEN
+		IF falling_edge(clk) AND (Mem /= '1' OR intr = '1') THEN
 			IF Enable = '1' THEN
 				pcsigout <= pcsigin;
 			END IF;
