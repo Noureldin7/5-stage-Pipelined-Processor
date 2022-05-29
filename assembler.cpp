@@ -1,5 +1,6 @@
 #include <iostream>
 #include <fstream>
+#include <cctype>
 #include <string>
 using namespace std;
 //TODO : function Hex_to_Binary 
@@ -122,6 +123,99 @@ string HexToBin(string hexdec)
         return "Invalid";
     }
 }
+
+string To_OPcode(string command){
+    long int i =0; 
+    while(command[i]){
+        command[i] = toupper(command[i]);
+        i++;
+    }
+if(command == "NOP"){
+    return "0000000";
+} 
+else if(command == "HLT"){
+    return "0000001";
+}
+else if(command == "SETC"){
+    return "0000110";
+}
+else if(command == "NOT"){
+    return "0001111";
+}
+else if(command == "INC"){
+    return "0001000";
+}
+else if(command == "IN"){
+    return "0011000";
+}
+else if(command == "OUT"){
+    return "0010001";
+}
+else if (command == "MOV"){
+    return "0001010";
+}
+else if (command == "SWAP"){
+    return "0001100";
+}
+else if (command == "ADD"){
+    return "0001001";
+}
+else if (command == "SUB"){
+    return "0001101";
+}
+else if (command == "AND"){
+    return "0001011";
+}
+else if (command == "IADD"){
+    return "1001001";
+}
+else if (command == "PUSH"){
+    return "0100010";
+}
+else if (command == "PUSHI"){
+    return "1100010";
+}
+else if (command == "POP"){
+    return "0101101";
+}
+else if (command == "LDM"){
+    return "1001100";
+}
+else if (command == "LDD"){
+    return "1101001";
+}
+else if (command == "STD"){
+    return "1100111";
+}
+else if (command == "JZ"){
+    return "1010000";
+}
+else if (command == "JN"){
+    return "1010001";
+}
+else if (command == "JC"){
+    return "1010010";
+}
+else if (command == "JMP"){
+    return "1010011";
+}
+else if (command == "CALL"){
+    return "1010100";
+}
+else if (command == "RET"){
+    return "0110000";
+}
+else if (command == "INT"){
+    return "1110001";
+}
+else if (command == "RTI"){
+    return "0110001";
+}
+else{
+    return "";
+}
+} 
+
 
 int main(int argc, char* argv[]){
 	
