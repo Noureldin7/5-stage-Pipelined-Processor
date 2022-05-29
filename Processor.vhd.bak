@@ -203,7 +203,7 @@ ARCHITECTURE CPUArch OF CPU IS
 			Zero : OUT STD_LOGIC;
 			Negative : OUT STD_LOGIC;
 			Unbuffered_Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-			Unbuffered_Jump : INOUT STD_LOGIC
+			Unbuffered_Jump : OUT STD_LOGIC
 		);
 	END COMPONENT;
 	COMPONENT MEMWB IS

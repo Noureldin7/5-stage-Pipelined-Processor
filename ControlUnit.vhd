@@ -31,10 +31,15 @@ BEGIN
 	SETC <= OpCode(2) AND OpCode(1) AND (NOT OpCode(0));
 	jmp <= (OpCode(6) OR OpCode(5)) AND OpCode(4);
 	Jump <= jmp;
-	IncSP <= OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
+	IncSP <= '1' WHEN OpCode = "0110000"
+		ELSE
+		OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
 		ELSE
 		'0';
-	DecSP <= NOT OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
+	DecSP <= '0' WHEN OpCode = "0110000" ELSE
+		NOT OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
+		ELSE
+		'1' WHEN OpCode = "1100010"
 		ELSE
 		'0';
 	Checks <= OpCode(1 DOWNTO 0) WHEN (jmp AND (OpCode(5) XNOR OpCode(2))) = '1'
