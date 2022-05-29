@@ -69,14 +69,14 @@ BEGIN
     BEGIN
         IF (JMP = '1') THEN
             EN <= '1';
-            Ins_Out <= Ins_In;
+            Ins_Out <= (OTHERS => '0');
             w_DE_OpCode <= (OTHERS => '0');
             w_DE_RD <= (OTHERS => '0');
             w_DE_RT <= (OTHERS => '0');
             w_DE_RS <= (OTHERS => '0');
             w_DE_Imm <= (OTHERS => '0');
         ELSIF (Call_Signal = '1') THEN
-            EN <= '0';
+            EN <= '1';
             Ins_Out <= "1010011" &
                 "000000000" &
                 r_FD_Imm;
@@ -85,7 +85,7 @@ BEGIN
             w_DE_RD <= (OTHERS => '0');
             w_DE_RT <= (OTHERS => '0');
             w_DE_RS <= (OTHERS => '0');
-            w_DE_Imm <= ("000000000000" & PC) + 1;
+            w_DE_Imm <= ("000000000000" & PC) - 1;
         ELSIF (HLT_Signal = '1' OR r_EM_MEMR = '1' OR r_EM_MEMW = '1') THEN
             EN <= '0';
             IF (Load_Use_Signal = '1') THEN

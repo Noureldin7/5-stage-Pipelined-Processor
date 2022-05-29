@@ -36,7 +36,8 @@ BEGIN
 		OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
 		ELSE
 		'0';
-	DecSP <= NOT OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
+	DecSP <= '0' WHEN OpCode = "0110000" ELSE
+		NOT OpCode(0) WHEN OpCode(6 DOWNTO 5) = ("01")
 		ELSE
 		'1' WHEN OpCode = "1100010"
 		ELSE

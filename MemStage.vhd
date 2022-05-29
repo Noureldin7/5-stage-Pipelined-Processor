@@ -20,7 +20,7 @@ ENTITY MEMWB IS
 		RegWritebuf : OUT STD_LOGIC;
 		RDbuf : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		DataOut : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		Unbuffered_DataOut : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Unbuffered_DataOut : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
 	);
 END ENTITY MEMWB;
 
@@ -29,6 +29,7 @@ ARCHITECTURE MEMWBArch OF MEMWB IS
 	SIGNAL InPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL OutPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL StackPtr : unsigned(31 DOWNTO 0) := (OTHERS => '1');
+	SIGNAL StackAddress : unsigned(31 DOWNTO 0);
 	SIGNAL Unbuffered_DataOut_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
 
@@ -46,9 +47,7 @@ BEGIN
 			RDbuf <= (OTHERS => '0');
 			DataOut <= (OTHERS => '0');
 		ELSIF rising_edge(clk) AND intr = '0' THEN
-			IF DecSP = '1' THEN
-				StackPtr <= StackPtr - 1;
-			END IF;
+
 			DataOut <= Unbuffered_DataOut_Signal;
 			RegWritebuf <= RegWrite;
 			RDbuf <= RD;
@@ -56,6 +55,9 @@ BEGIN
 			IF intr = '1' THEN
 				StackPtr <= StackPtr - 1;
 			ELSE
+				IF DecSP = '1' THEN
+					StackPtr <= StackPtr - 1;
+				END IF;
 				IF IncSP = '1' THEN
 					StackPtr <= StackPtr + 1;
 				END IF;
@@ -65,7 +67,11 @@ BEGIN
 			END IF;
 		END IF;
 	END PROCESS;
-	AddressOut <= STD_LOGIC_VECTOR(StackPtr(19 DOWNTO 0)) WHEN (IncSP OR intr OR DecSP) = '1'
+
+	StackAddress <= StackPtr WHEN DecSP = '1' ELSE
+		StackPtr + 1;
+
+	AddressOut <= STD_LOGIC_VECTOR(StackAddress(19 DOWNTO 0)) WHEN (IncSP OR intr OR DecSP) = '1'
 		ELSE
 		Result(19 DOWNTO 0);
 END MEMWBArch;

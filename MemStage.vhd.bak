@@ -29,15 +29,17 @@ ARCHITECTURE MEMWBArch OF MEMWB IS
 	SIGNAL InPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL OutPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL StackPtr : unsigned(31 DOWNTO 0) := (OTHERS => '1');
-	SIGNAL Unbuffered_DataOut_Signal : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+	SIGNAL StackAddress :  unsigned(31 DOWNTO 0);
+	SIGNAL Unbuffered_DataOut_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
+
 	Unbuffered_DataOut_Signal <= (OTHERS => '0') WHEN rst = '1' ELSE
 		MemData WHEN MemRead = '1' ELSE
 		STD_LOGIC_VECTOR(InPort(0)) WHEN PortRead = '1' ELSE
 		Result;
 
 	Unbuffered_DataOut <= Unbuffered_DataOut_Signal;
-	
+
 	PROCESS (clk, rst)
 	BEGIN
 		IF rst = '1' THEN
@@ -64,7 +66,11 @@ BEGIN
 			END IF;
 		END IF;
 	END PROCESS;
-	AddressOut <= STD_LOGIC_VECTOR(StackPtr(19 DOWNTO 0)) WHEN (IncSP OR intr OR DecSP) = '1'
+
+	StackAddress <= StackPtr when DecSP = '1' else
+	StackPtr + 1;
+
+	AddressOut <= (STD_LOGIC_VECTOR(StackAddress))(19 downto 0) WHEN (IncSP OR intr OR DecSP) = '1'
 		ELSE
 		Result(19 DOWNTO 0);
 END MEMWBArch;

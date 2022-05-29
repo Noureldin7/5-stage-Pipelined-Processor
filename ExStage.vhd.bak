@@ -28,6 +28,7 @@ ENTITY Execute IS
 		RSbuf : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
 		RegWritebuf : OUT STD_LOGIC;
 		Immediatebuf : OUT STD_LOGIC;
+		Jump_Original : OUT STD_LOGIC;
 		Jumpbuf : INOUT STD_LOGIC;
 		IncSPbuf : OUT STD_LOGIC;
 		DecSPbuf : OUT STD_LOGIC;
@@ -40,7 +41,8 @@ ENTITY Execute IS
 		Carry : OUT STD_LOGIC;
 		Zero : OUT STD_LOGIC;
 		Negative : OUT STD_LOGIC;
-		Unbuffered_Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0)
+		Unbuffered_Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
+		Unbuffered_Jump : OUT STD_LOGIC
 	);
 END ENTITY Execute;
 
@@ -82,7 +84,20 @@ BEGIN
 
 	Carrysig <= ALUC WHEN AlUEnable = '1' AND (Mode = "00" OR Mode = "01") ELSE
 		'1' WHEN SETC = '1' ELSE
-		
+		'0' WHEN Jumpbuf = '1' AND Checks = ("10");
+
+	PROCESS (Jump, Zerosig, IncSP, DecSP, Carrysig, Negativesig, Checks)
+BEGIN
+		IF Checks = ("00") THEN
+			Unbuffered_Jump <= Jump AND Zerosig AND (IncSP NOR DecSP);
+		ELSIF Checks = ("01") THEN
+			Unbuffered_Jump <= Jump AND Negativesig AND (IncSP NOR DecSP);
+		ELSIF Checks = ("10") THEN
+			Unbuffered_Jump <= Jump AND Carrysig AND (IncSP NOR DecSP);
+		ELSE
+			Unbuffered_Jump <= Jump AND (IncSP NOR DecSP);
+		END IF;
+	END PROCESS;
 
 	PROCESS (clk, rst)
 	BEGIN
@@ -98,18 +113,12 @@ BEGIN
 			MEMWbuf <= '0';
 			MEMRbuf <= '0';
 			Jumpbuf <= '0';
+			Jump_Original <= '0';
 			Checksbuf <= (OTHERS => '0');
 			Result <= (OTHERS => '0');
 		ELSIF rising_edge(clk) AND intr = '0' THEN
-			IF Checks = ("00") THEN
-				Jumpbuf <= Jump AND Zerosig;
-			ELSIF Checks = ("01") THEN
-				Jumpbuf <= Jump AND Negativesig;
-			ELSIF Checks = ("10") THEN
-				Jumpbuf <= Jump AND Carrysig;
-			ELSE
-				Jumpbuf <= Jump;
-			END IF;
+			Jumpbuf <= Unbuffered_Jump;
+			Jump_Original <= Jump;
 			RDbuf <= RD;
 			RSbuf <= RS;
 			RegWritebuf <= RegWrite;

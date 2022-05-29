@@ -59,7 +59,7 @@ BEGIN
 	PROCESS (clk)
 	BEGIN
 		IF falling_edge(clk) THEN
-			IF Enable = '1' THEN
+			IF Enable = '1' or CheckedJump = '1' THEN
 				pcsigout <= pcsigin;
 			END IF;
 		END IF;
