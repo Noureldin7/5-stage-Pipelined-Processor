@@ -42,16 +42,24 @@ BEGIN
 
 	PROCESS (clk, rst)
 	BEGIN
+		IF (rst = '1') THEN
+			DataOut <= (OTHERS => '0');
+		ELSIF falling_edge(clk) THEN
+			DataOut <= Unbuffered_DataOut_Signal;
+			IF PortWrite = '1' THEN
+				OutPort(0) <= unsigned(Result);
+			END IF;
+		END IF;
+	END PROCESS;
+
+	PROCESS (clk, rst)
+	BEGIN
 		IF rst = '1' THEN
 			RegWritebuf <= '0';
 			RDbuf <= (OTHERS => '0');
-			DataOut <= (OTHERS => '0');
-		ELSIF rising_edge(clk) AND intr = '0' THEN
-
-			DataOut <= Unbuffered_DataOut_Signal;
+		ELSIF rising_edge(clk) THEN
 			RegWritebuf <= RegWrite;
 			RDbuf <= RD;
-		ELSIF falling_edge(clk) THEN
 			IF intr = '1' THEN
 				StackPtr <= StackPtr - 1;
 			ELSE
@@ -60,9 +68,6 @@ BEGIN
 				END IF;
 				IF IncSP = '1' THEN
 					StackPtr <= StackPtr + 1;
-				END IF;
-				IF PortWrite = '1' THEN
-					OutPort(0) <= unsigned(Result);
 				END IF;
 			END IF;
 		END IF;

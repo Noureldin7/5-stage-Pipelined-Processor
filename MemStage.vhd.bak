@@ -29,7 +29,7 @@ ARCHITECTURE MEMWBArch OF MEMWB IS
 	SIGNAL InPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL OutPort : Ports := (OTHERS => (OTHERS => '0'));
 	SIGNAL StackPtr : unsigned(31 DOWNTO 0) := (OTHERS => '1');
-	SIGNAL StackAddress :  unsigned(31 DOWNTO 0);
+	SIGNAL StackAddress : unsigned(31 DOWNTO 0);
 	SIGNAL Unbuffered_DataOut_Signal : STD_LOGIC_VECTOR(31 DOWNTO 0);
 BEGIN
 
@@ -42,35 +42,41 @@ BEGIN
 
 	PROCESS (clk, rst)
 	BEGIN
+		IF (rst = '1')
+			DataOut <= (OTHERS => '0');
+		ELSIF falling_edge(clk) THEN
+			DataOut <= Unbuffered_DataOut_Signal;
+			IF PortWrite = '1' THEN
+				OutPort(0) <= unsigned(Result);
+			END IF;
+		END IF;
+	END PROCESS;
+
+	PROCESS (clk, rst)
+	BEGIN
 		IF rst = '1' THEN
 			RegWritebuf <= '0';
 			RDbuf <= (OTHERS => '0');
-			DataOut <= (OTHERS => '0');
-		ELSIF rising_edge(clk) AND intr = '0' THEN
-			IF DecSP = '1' THEN
-				StackPtr <= StackPtr - 1;
-			END IF;
-			DataOut <= Unbuffered_DataOut_Signal;
+		ELSIF rising_edge(clk) THEN
 			RegWritebuf <= RegWrite;
 			RDbuf <= RD;
-		ELSIF falling_edge(clk) THEN
 			IF intr = '1' THEN
 				StackPtr <= StackPtr - 1;
 			ELSE
+				IF DecSP = '1' THEN
+					StackPtr <= StackPtr - 1;
+				END IF;
 				IF IncSP = '1' THEN
 					StackPtr <= StackPtr + 1;
-				END IF;
-				IF PortWrite = '1' THEN
-					OutPort(0) <= unsigned(Result);
 				END IF;
 			END IF;
 		END IF;
 	END PROCESS;
 
-	StackAddress <= StackPtr when DecSP = '1' else
-	StackPtr + 1;
+	StackAddress <= StackPtr WHEN DecSP = '1' ELSE
+		StackPtr + 1;
 
-	AddressOut <= (STD_LOGIC_VECTOR(StackAddress))(19 downto 0) WHEN (IncSP OR intr OR DecSP) = '1'
+	AddressOut <= STD_LOGIC_VECTOR(StackAddress(19 DOWNTO 0)) WHEN (IncSP OR intr OR DecSP) = '1'
 		ELSE
 		Result(19 DOWNTO 0);
 END MEMWBArch;
