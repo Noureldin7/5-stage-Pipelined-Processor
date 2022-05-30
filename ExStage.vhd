@@ -7,6 +7,7 @@ ENTITY Execute IS
 		clk : IN STD_LOGIC;
 		rst : IN STD_LOGIC;
 		intr : IN STD_LOGIC;
+		OpIn : IN STD_LOGIC_VECTOR(6 DOWNTO 0);
 		RD : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 		RS : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
 		Op1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -23,6 +24,8 @@ ENTITY Execute IS
 		MemWrite : IN STD_LOGIC;
 		MemRead : IN STD_LOGIC;
 		SETC : IN STD_LOGIC;
+		FR_IN : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
+		Flag_Override : IN STD_LOGIC;
 		Checks : IN STD_LOGIC_VECTOR(1 DOWNTO 0);
 		RDbuf : OUT STD_LOGIC_VECTOR(2 DOWNTO 0);
 		RSbuf : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -42,7 +45,8 @@ ENTITY Execute IS
 		Zero : OUT STD_LOGIC;
 		Negative : OUT STD_LOGIC;
 		Unbuffered_Result : OUT STD_LOGIC_VECTOR(31 DOWNTO 0);
-		Unbuffered_Jump : INOUT STD_LOGIC
+		Unbuffered_Jump : INOUT STD_LOGIC;
+		OpOut : OUT STD_LOGIC_VECTOR(6 DOWNTO 0)
 	);
 END ENTITY Execute;
 
@@ -50,6 +54,7 @@ ARCHITECTURE ExArch OF Execute IS
 	SIGNAL Carrysig, Zerosig, Negativesig : STD_LOGIC := '0';
 	SIGNAL ALUC, ALUZ, ALUN : STD_LOGIC := '0';
 	SIGNAL Resultsig : STD_LOGIC_VECTOR(31 DOWNTO 0) := (OTHERS => '0');
+	SIGNAL FR_IN_BUF : STD_LOGIC_VECTOR(2 DOWNTO 0);
 	COMPONENT ALU IS
 		PORT (
 			OpA : IN STD_LOGIC_VECTOR(31 DOWNTO 0);
@@ -66,28 +71,25 @@ ARCHITECTURE ExArch OF Execute IS
 BEGIN
 	Unbuffered_Result <= Resultsig;
 	ex : ALU PORT MAP(Op1, Op2, Mode, ALUEnable, SETC, Resultsig, ALUC, ALUZ, ALUN);
-	Zero <= '0' WHEN Checks = ("00")
-		ELSE
-		ALUZ;
-	Negative <= '0' WHEN Checks = ("01")
-		ELSE
-		ALUN;
-	Carry <= '0' WHEN Checks = ("10")
-		ELSE
-		ALUC;
+	Zero <= ZeroSig;
+	Negative <= Negativesig;
+	Carry <= Carrysig;
 
-	ZeroSig <= ALUZ WHEN ALUEnable = '1' ELSE
+	ZeroSig <= FR_IN_BUF(2) WHEN Flag_Override = '1' ELSE
+		ALUZ WHEN ALUEnable = '1' AND MemWrite = '0' AND MEMRead = '0' ELSE
 		'0' WHEN Jumpbuf = '1' AND Checks = ("00");
 
-	Negativesig <= ALUN WHEN AlUEnable = '1' ELSE
+	Negativesig <= FR_IN_BUF(0) WHEN Flag_Override = '1' ELSE
+		ALUN WHEN AlUEnable = '1' AND MemWrite = '0' AND MEMRead = '0' ELSE
 		'0' WHEN Jumpbuf = '1' AND Checks = ("01");
 
-	Carrysig <= ALUC WHEN AlUEnable = '1' AND (Mode = "00" OR Mode = "01") ELSE
+	Carrysig <= FR_IN_BUF(1) WHEN Flag_Override = '1' ELSE
+		ALUC WHEN AlUEnable = '1' AND (Mode = "00" OR Mode = "01") AND MemWrite = '0' AND MEMRead = '0'ELSE
 		'1' WHEN SETC = '1' ELSE
 		'0' WHEN Jumpbuf = '1' AND Checks = ("10");
 
 	PROCESS (Jump, Zerosig, IncSP, DecSP, Carrysig, Negativesig, Checks)
-BEGIN
+	BEGIN
 		IF Checks = ("00") THEN
 			Unbuffered_Jump <= Jump AND Zerosig AND (IncSP NOR DecSP);
 		ELSIF Checks = ("01") THEN
@@ -96,6 +98,13 @@ BEGIN
 			Unbuffered_Jump <= Jump AND Carrysig AND (IncSP NOR DecSP);
 		ELSE
 			Unbuffered_Jump <= Jump AND (IncSP NOR DecSP);
+		END IF;
+	END PROCESS;
+
+	PROCESS (clk)
+	BEGIN
+		IF (falling_edge(clk)) THEN
+			FR_IN_BUF <= FR_IN;
 		END IF;
 	END PROCESS;
 
@@ -116,6 +125,7 @@ BEGIN
 			Jump_Original <= '0';
 			Checksbuf <= (OTHERS => '0');
 			Result <= (OTHERS => '0');
+			OpOut <= (OTHERS => '0');
 		ELSIF rising_edge(clk) AND intr = '0' THEN
 			Jumpbuf <= Unbuffered_Jump;
 			Jump_Original <= Jump;
@@ -131,7 +141,7 @@ BEGIN
 			MEMRbuf <= MemRead;
 			Checksbuf <= Checks;
 			Result <= Resultsig;
-
+			OpOut <= OpIn;
 		END IF;
 	END PROCESS;
 END ExArch;

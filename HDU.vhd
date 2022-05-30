@@ -22,6 +22,7 @@ ENTITY HDU IS
         r_EM_MEMW : IN STD_LOGIC;
 
         JMP : IN STD_LOGIC;
+        FR : IN STD_LOGIC_VECTOR(2 DOWNTO 0);
 
         Imm_1 : IN STD_LOGIC_VECTOR(31 DOWNTO 0); --forwarded val
         Imm_2 : IN STD_LOGIC_VECTOR(31 DOWNTO 0); --forwarded val
@@ -86,6 +87,18 @@ BEGIN
             w_DE_RT <= (OTHERS => '0');
             w_DE_RS <= (OTHERS => '0');
             w_DE_Imm <= ("000000000000" & PC) - 1;
+
+        ELSIF (INT_Signal = '1') THEN
+            EN <= '1';
+            Ins_Out <= "1110000" &
+                "000000000" &
+                (r_FD_Imm + 2);
+
+            w_DE_OpCode <= "1100010";
+            w_DE_RD <= (OTHERS => '0');
+            w_DE_RT <= (OTHERS => '0');
+            w_DE_RS <= (OTHERS => '0');
+            w_DE_Imm <= ("100000000" & FR & PC) - 1;
         ELSIF (HLT_Signal = '1' OR r_EM_MEMR = '1' OR r_EM_MEMW = '1') THEN
             EN <= '0';
             IF (Load_Use_Signal = '1') THEN

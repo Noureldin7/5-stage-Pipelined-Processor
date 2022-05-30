@@ -34,7 +34,8 @@ ENTITY Decode IS
 		MEMR : OUT STD_LOGIC;
 		SETC : OUT STD_LOGIC;
 		Checks : OUT STD_LOGIC_VECTOR(1 DOWNTO 0);
-		Imm_Flag : OUT STD_LOGIC
+		Imm_Flag : OUT STD_LOGIC;
+		OpCodeOut : OUT STD_LOGIC_VECTOR(6 DOWNTO 0)
 		);
 		
 END ENTITY Decode;
@@ -95,6 +96,7 @@ BEGIN
 			MEMR <= '0';
 			SETC <= '0';
 			Checks <= (OTHERS => '0');
+			OpCodeOut <= (OTHERS => '0');
 		ELSIF rising_edge(clk) AND intr = '0' THEN
 			RDbuf <= RD;
 			Op1 <= RT;
@@ -119,6 +121,7 @@ BEGIN
 			MEMR <= MemRsig;
 			SETC <= SETCsig;
 			Checks <= Chksig;
+			OpCodeOut <= OpCode;
 		END IF;
 	END PROCESS;
 END DecodeArch;
